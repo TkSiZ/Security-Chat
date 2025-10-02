@@ -1,6 +1,6 @@
 services:
   db:
-    build: ./db
+    build: ./backend/db
     container_name: docker_db_project
     image: postgres-populate:latest
     ports:
