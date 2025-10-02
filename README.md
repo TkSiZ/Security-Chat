@@ -16,8 +16,8 @@ docker compose up --build
 ````
 ## 2. Test the server
 
-1. If the postgres isn't downloaded access this link: [Postgres instalation](https://www.postgresql.org/download/windows/)
-   1.1 After download postgres add the psql to the PATH in environment variables
+1. If the postgres isn't downloaded access this link: [Postgres instalation](https://www.postgresql.org/download/windows/)<br>
+   1.1-After download postgres add the psql to the PATH in environment variables
 2. Test in terminal
 ```bash
 
