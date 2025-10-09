@@ -1,10 +1,12 @@
 import { Component } from "@angular/core";
-import { SideBarComponent } from "../../components/side-bar/side-bar.component";
+import { SidebarComponent } from "../../components/sidebar/sidebar.component";
+import { ChatComponent } from "../../components/chat/chat.component";
 
 @Component({
-    selector:'home-page',
-    templateUrl:'./home.component.html',
-    styleUrls:['./home.component.css'],
-    imports:[SideBarComponent]
+  selector: 'home-page',
+  standalone: true,
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css'],
+  imports: [SidebarComponent, ChatComponent]
 })
-export class Home {}
+export class HomeComponent {}

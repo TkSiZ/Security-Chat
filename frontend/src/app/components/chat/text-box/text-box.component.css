@@ -1,0 +1,31 @@
+.textbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #e2e8f0;
+  border-top: 1px solid #cbd5e1;
+}
+
+.textbox input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+.textbox button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.textbox button:hover {
+  background-color: #1e40af;
+}
