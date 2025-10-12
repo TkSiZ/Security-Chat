@@ -1,11 +1,12 @@
 from backend.encryption_utils import *
 
-DESCRIPTION = "Locally cipher and decipher a message using 3DES"
+DESCRIPTION = "Cipher and decipher a message using 3DES"
+
 MESSAGE = "Bom dia filho. Posso revistar a sua casa?"
 
 key = generate_3des_key()
 nonce, ciphertext = encrypt_message_with_3des(MESSAGE, key)
-deciphered_text = decrypt(nonce, ciphertext, key)
+deciphered_text = decrypt_with_3des(nonce, ciphertext, key)
 
 assert deciphered_text == MESSAGE, f"Deciphered text '{deciphered_text}' was different than the MESSAGE {MESSAGE}"
 
