@@ -6,7 +6,7 @@ This guide explains how to start the Postgres database using Docker and test the
 
 ## 1. Start the Database
 
-1. Install Docker Desktop for Windows: [Docker Installation Guide](https://docs.docker.com/desktop/setup/install/windows-install/).  
+1. Install Docker Desktop for Windows (17.6): [Docker Installation Guide](https://docs.docker.com/desktop/setup/install/windows-install/).  
 2. Open a terminal (PowerShell or Command Prompt) and navigate to the root of the project.  
 3. Build and start the database container:
 
