@@ -4,7 +4,7 @@ services:
     container_name: docker_db_project
     image: postgres-populate:latest
     ports:
-      - "5432:5432"
+      - "5431:5432"
     environment:
       APP_USER: app_user
       APP_PASSWORD: 1234
