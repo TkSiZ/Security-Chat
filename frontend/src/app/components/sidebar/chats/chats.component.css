@@ -16,7 +16,7 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.chat-item.ativo {
+.chat-item.selected {
   background: linear-gradient(135deg, rgba(255, 107, 107, 0.3) 0%, rgba(238, 90, 36, 0.3) 100%);
   border-color: rgba(255, 107, 107, 0.3);
 }
@@ -34,3 +34,4 @@
   margin: 4px 0 0;
   line-height: 1.3;
 }
+

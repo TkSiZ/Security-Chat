@@ -1,4 +1,9 @@
 <div class="sidebar">
   <h2>Conversas</h2>
-  <app-chats *ngFor="let c of conversas" [id]=1></app-chats>
+  @for(chat of chats; track chat){
+    <app-chats [chatName]=chat.name  
+               [chatId]=chat.id
+               [currentChat]=currentChat
+              ></app-chats>
+  }
 </div>

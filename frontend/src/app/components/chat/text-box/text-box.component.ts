@@ -10,13 +10,13 @@ import { FormsModule } from "@angular/forms";
   styleUrls: ['./text-box.component.css']
 })
 export class TextBoxComponent {
-  @Output() enviarMensagem = new EventEmitter<string>();
-  mensagem = '';
+  @Output() sendMessageChild = new EventEmitter<string>();
+  menssageText = '';
 
   enviar() {
-    if (this.mensagem.trim()) {
-      this.enviarMensagem.emit(this.mensagem);
-      this.mensagem = '';
+    if (this.menssageText.trim()) {
+      this.sendMessageChild.emit(this.menssageText);
+      this.menssageText = '';
     }
   }
 }

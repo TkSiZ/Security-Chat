@@ -1,27 +1,34 @@
-@if (mensagens.length) {
-  <div class="chat-container">
-    <header class="chat-header">
-      <h3>{{ mensagens[0]?.autor }}</h3>
-    </header>
-
-    <section class="mensagens">
-      @for (mensagem of mensagens; track mensagem) {
-        <div
-          class="mensagem"
-          [class.eu]="mensagem.autor === 'eu'"
-        >
-          <div class="author">
-            {{ mensagem.autor === 'eu' ? 'Você' : mensagem.autor }}
-          </div>
-          <div class="text">{{ mensagem.texto }}</div>
-        </div>
-      }
-    </section>
-
-    <app-text-box (enviarMensagem)="adicionarMensagem($event)"></app-text-box>
-  </div>
+@if (currentChat === null){
+  <h3>Selecione um chat</h3>
 } @else {
-  <div class="chat-placeholder">
-    <p>Selecione uma conversa à esquerda</p>
-  </div>
+    @if (messages.length) {
+    <div class="chat-container">
+      <header class="chat-header">
+        <h3>{{ messages[0]?.author }}</h3>
+      </header>
+
+      <section class="messages">
+        @for (message of messages; track message) {
+          <!-- TO DO: CHANGE THIS TO VERIFY THE NAME IN THE CONTEXT -->
+          <div
+            class="message"
+            [class.me]="message.author === 'eu'"  
+            [class.received]="message.author !== 'eu'"
+          >
+            <div class="author">
+              <!-- TO DO: CHANGE THIS TO VERIFY THE NAME IN THE CONTEXT -->
+              {{ message.author === 'eu' ? 'Você' : message.author }}
+            </div>
+            <div class="text">{{ message.text }}</div>
+          </div>
+        }
+      </section>
+
+      <app-text-box (sendMessageChild)="sendMessage($event)"></app-text-box>
+    </div>
+  } @else {
+    <div class="chat-placeholder">
+      <p>Sem mensagens</p>
+    </div>
+  }
 }

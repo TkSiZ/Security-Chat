@@ -22,7 +22,7 @@
 
 }
 
-.mensagens {
+.messages {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
@@ -31,7 +31,7 @@
   background: rgba(15, 15, 35, 0.7);
 }
 
-.mensagem {
+.message {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   margin: 8px 0;
@@ -44,7 +44,7 @@
   animation: slideIn 0.3s ease;
 }
 
-.mensagem.eu {
+.message.me {
   align-self: flex-end;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: #fff;
@@ -52,7 +52,7 @@
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
-.mensagem.recebida {
+.message.received {
   align-self: flex-start;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: #fff;
@@ -60,7 +60,7 @@
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
-.autor {
+.author {
   font-weight: 600;
   font-size: 0.75rem;
   margin-bottom: 4px;
@@ -69,11 +69,11 @@
   letter-spacing: 0.5px;
 }
 
-.mensagem.eu .autor {
+.message.me .author {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.texto {
+.text {
   font-size: 0.95rem;
   line-height: 1.4;
   color: #f1f5f9;
