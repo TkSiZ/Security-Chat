@@ -1,20 +1,27 @@
-<div class="chat-container" *ngIf="mensagens; else semConversa">
-  <div class="chat-header">
-    <h3>{{ mensagens[0].autor}}</h3>
+@if (mensagens.length) {
+  <div class="chat-container">
+    <header class="chat-header">
+      <h3>{{ mensagens[0]?.autor }}</h3>
+    </header>
+
+    <section class="mensagens">
+      @for (mensagem of mensagens; track mensagem) {
+        <div
+          class="mensagem"
+          [class.eu]="mensagem.autor === 'eu'"
+        >
+          <div class="author">
+            {{ mensagem.autor === 'eu' ? 'Você' : mensagem.autor }}
+          </div>
+          <div class="text">{{ mensagem.texto }}</div>
+        </div>
+      }
+    </section>
+
+    <app-text-box (enviarMensagem)="adicionarMensagem($event)"></app-text-box>
   </div>
-
-  <div class="mensagens">
-    <div *ngFor="let msg of mensagens" class="mensagem" [class.eu]="msg.autor === 'eu'">
-      <div class="autor">{{ msg.autor === 'eu' ? 'Você' : msg.autor }}</div>
-      <div class="texto">{{ msg.texto }}</div>
-    </div>
-  </div>
-
-  <app-text-box (enviarMensagem)="adicionarMensagem($event)"></app-text-box>
-</div>
-
-<ng-template #semConversa>
+} @else {
   <div class="chat-placeholder">
     <p>Selecione uma conversa à esquerda</p>
   </div>
-</ng-template>
+}

@@ -1,6 +1,8 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TextBoxComponent } from "./text-box/text-box.component";
+import { Message } from "../../types/message";
+import { ChatService } from "../../services/chat/chat";
 
 @Component({
   selector: 'app-chat',
@@ -11,11 +13,23 @@ import { TextBoxComponent } from "./text-box/text-box.component";
 })
 
 export class ChatComponent {
-  mensagens = [
-    { texto: "To ablubleble das ideias?", autor: "eu" }
-  ];
+  mensagem = ''
+  sender= ''
+  recipient = ''
+  mensagens : Message[] = []
 
-  adicionarMensagem(novaMensagem: string) {
-    this.mensagens.push({ texto: novaMensagem, autor: "eu" });
+  constructor(private chatService: ChatService) {}
+
+  ngOnInit() : void {
+    this.chatService.onMessage((msg: Message) => {
+      this.mensagens.push(msg)
+    })
+  }
+
+  sendMessage(): void {
+    if (this.mensagem.trim()) {
+      this.chatService.sendMessage(this.)
+    }
   }
 }
+
