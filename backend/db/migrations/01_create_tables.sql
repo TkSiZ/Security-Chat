@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS public."Room"
 (
     room_id serial NOT NULL,
     admin integer NOT NULL,
-    CONSTRAINT "Room_pkey" PRIMARY KEY (id)
+    PRIMARY KEY (room_id)
 );
 
 CREATE TABLE IF NOT EXISTS public."User"
@@ -15,31 +15,22 @@ CREATE TABLE IF NOT EXISTS public."User"
     user_id serial NOT NULL,
     username character varying(30) COLLATE pg_catalog."default" NOT NULL,
     public_key character varying(1000) NOT NULL,
-    CONSTRAINT "User_pkey" PRIMARY KEY (id),
-    CONSTRAINT unique_username UNIQUE (username)
+    PRIMARY KEY (user_id),
+    UNIQUE (username)
 );
 
 COMMENT ON TABLE public."User"
-    IS 'The public key is treated as var char because it is too big for biginteger representation';
+    IS 'The public key is treated as var char because it is too big for int representation';
 
 CREATE TABLE IF NOT EXISTS public."User_In_Room"
 (
-    user_in_room_id serial NOT NULL,
     room_id integer NOT NULL,
     user_id integer NOT NULL,
-    PRIMARY KEY (user_in_room_id)
+    PRIMARY KEY (room_id, user_id)
 );
 
 ALTER TABLE IF EXISTS public."Room"
-    ADD CONSTRAINT admin_fkey FOREIGN KEY (admin)
-    REFERENCES public."User_In_Room" (user_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS public."User_In_Room"
-    ADD CONSTRAINT user_kfey FOREIGN KEY (user_id)
+    ADD FOREIGN KEY (admin)
     REFERENCES public."User" (user_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
@@ -47,8 +38,16 @@ ALTER TABLE IF EXISTS public."User_In_Room"
 
 
 ALTER TABLE IF EXISTS public."User_In_Room"
-    ADD CONSTRAINT room_fkey FOREIGN KEY (room_id)
+    ADD FOREIGN KEY (room_id)
     REFERENCES public."Room" (room_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public."User_In_Room"
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public."User" (user_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
