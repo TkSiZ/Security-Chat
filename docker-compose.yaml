@@ -13,6 +13,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
+
+  server:
+    build: ./backend/app
+    ports:
+    - "80:80"
   
 volumes:
   pgdata:

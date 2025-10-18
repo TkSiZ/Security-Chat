@@ -1,4 +1,4 @@
-from backend.encryption_utils import *
+from backend.app.encryption_utils import *
 
 DESCRIPTION = "Verify that two users can encrypt and decrypt a 3DES key through Salsa20"
 

@@ -1,4 +1,4 @@
-from encryption_utils import *
+from .encryption_utils import *
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,3 +11,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/")
+def is_connected():
+    return {"is_connected" : True}
