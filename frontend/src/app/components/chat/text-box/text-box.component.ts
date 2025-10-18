@@ -13,7 +13,7 @@ export class TextBoxComponent {
   @Output() sendMessageChild = new EventEmitter<string>();
   menssageText = '';
 
-  enviar() {
+  send() {
     if (this.menssageText.trim()) {
       this.sendMessageChild.emit(this.menssageText);
       this.menssageText = '';

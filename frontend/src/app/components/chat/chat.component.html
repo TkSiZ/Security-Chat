@@ -12,12 +12,12 @@
           <!-- TO DO: CHANGE THIS TO VERIFY THE NAME IN THE CONTEXT -->
           <div
             class="message"
-            [class.me]="message.author === 'eu'"  
-            [class.received]="message.author !== 'eu'"
+            [class.me]="message.author === 'me'"  
+            [class.received]="message.author !== 'me'"
           >
             <div class="author">
               <!-- TO DO: CHANGE THIS TO VERIFY THE NAME IN THE CONTEXT -->
-              {{ message.author === 'eu' ? 'Você' : message.author }}
+              {{ message.author === 'me' ? 'You' : message.author }}
             </div>
             <div class="text">{{ message.text }}</div>
           </div>
