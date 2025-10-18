@@ -1,4 +1,4 @@
-from backend.encryption_utils import *
+from backend.app.encryption_utils import *
 
 DESCRIPTION = "Cipher and decipher a message using 3DES"
 
