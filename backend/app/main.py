@@ -31,7 +31,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class ConnectionManager:
     def __init__(self):
         # store active connections as {room_id: {user_id: WebSocket}}
@@ -40,14 +39,18 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, room_id: int, user_id: int):
         await websocket.accept()
         if room_id not in self.active_connections:
-            self.active_connections[room_id] = {}
+            self.active_connections[room_id] = {} # creates room
+            # create_room(room_id, user_id, room_name) # creates room in database
         self.active_connections[room_id][user_id] = websocket
+        print(f"WEBSOCKET CONNECTED USER {user_id}; room {room_id}")
 
     def disconnect(self, room_id: int, user_id: int):
         if (room_id in self.active_connections) and (user_id in self.active_connections[room_id]):
             del self.active_connections[room_id][user_id] # removes websocket
             if not self.active_connections[room_id]: # if no websocket in room, deletes room
                 del self.active_connections[room_id]
+                # delete_room(room_id)
+        print(f"WEBSOCKET DISCONNECTED USER {user_id}; room {room_id}")
 
     async def broadcast(self, message: str, room_id: int, sender_id: int):
         # Sends a message to all users in the room
@@ -93,10 +96,6 @@ def get_user_info(username):
 
     return {"user_id" : user_id, "user_rooms": user_rooms, "user_admins": user_admins}
 
-@app.get("/")
-def is_connected():
-    return {"is_connected" : 1}
-
 @app.post("/login")
 def login(username:str):
     # login currently uses username instead of user_id, this might change
@@ -110,7 +109,7 @@ def login(username:str):
     private_key = generate_private_key()
     public_key = generate_public_key(private_key)
 
-    # private key is stored locally
+    # private key is stored locally # TODO this must be on client
     with open("local_user_data.txt", "w") as file:
         file.write(str(private_key))
 
@@ -134,10 +133,9 @@ def login(username:str):
 
 @app.post("/create_room")
 def create_room(
-        # websocket: WebSocket,
         room_id,
         room_name,
-        username
+        user_id
 ):
     # check if room exists
     cur.execute(
@@ -148,14 +146,14 @@ def create_room(
     if cur.fetchone():
         return {"msg" : f"Room '{room_id}'already exists"}
 
-    # search for user id
+    # check if user exists
     cur.execute(
-        """SELECT user_id FROM "User" WHERE username = %s""",
-        (username,)
+        """SELECT * FROM "User" WHERE user_id = %s""",
+        (user_id,)
     )
-    user_id = cur.fetchone()
+    user = cur.fetchone()
     if not user_id:
-        return {"msg": f"User '{username}' does not exist"}
+        return {"msg": f"User of ID '{user_id}' does not exist"}
 
     # create room
     cur.execute(
@@ -170,25 +168,40 @@ def create_room(
     )
     # maybe check if user is already in room, which should not happen naturally
 
-    # connect to websocket?
-
     conn.commit()
 
-    return {"msg": f"Room '{room_id}' created and admin is user '{username}'"}
+    return {
+        "msg": f"Room '{room_id}' created and admin is user {user[1]}'",
+        "room_id": room_id
+    }
 
-@app.websocket("/room/{room_id}/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, room_id: int, user_id: int, username:str):
+@app.websocket("/ws/{room_id}/{user_id}")
+async def websocket_endpoint(
+        websocket: WebSocket,
+        room_id: int,
+        user_id: int,
+        # username:str
+):
     await manager.connect(websocket, room_id, user_id)
-    await manager.broadcast(f"{username} (ID: {user_id}) has joined the chat.", room_id, user_id)
+    await manager.broadcast(f"'{user_id}' has joined the chat.", room_id, user_id)
 
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.broadcast(f"{username} (ID: {user_id}): {data}", room_id, user_id)
+            await manager.broadcast(f"'{user_id}': {data}", room_id, user_id)
     except WebSocketDisconnect:
         manager.disconnect(room_id, user_id)
-        await manager.broadcast(f"{username} (ID: {user_id}) has left the chat.", room_id, user_id)
+        await manager.broadcast(f"'{user_id}' has left the chat.", room_id, user_id)
 
-@app.post("/room/{room_id}")
-def send_message(message):
-    pass
+@app.websocket("/fds")
+async def test_websocket(websocket: WebSocket):
+    print("test websocket", websocket)
+    await websocket.accept()
+
+@app.delete("/test/delete_room")
+def delete_room(room_id):
+    cur.execute(
+        """DELETE FROM "Room" WHERE room_id = %s;""",
+        (room_id,)
+    )
+    conn.commit()
