@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { SidebarComponent } from "../../components/sidebar/sidebar.component";
 import { ChatComponent } from "../../components/chat/chat.component";
+import { UserContextService } from '../../services/context/context';
 
 @Component({
   selector: 'home-page',
@@ -9,4 +10,6 @@ import { ChatComponent } from "../../components/chat/chat.component";
   styleUrls: ['./home.component.css'],
   imports: [SidebarComponent, ChatComponent]
 })
-export class HomeComponent {}
+export class HomeComponent {
+  constructor(public userContext: UserContextService) {}
+}

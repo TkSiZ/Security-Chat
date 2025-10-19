@@ -3,8 +3,12 @@
 } @else {
   <div class="chat-container">
     <header class="chat-header">
-      <h3>{{currentChat.name}}</h3>
+      <h3 class="chat-name">{{ currentChat.name || 'Selecione um chat' }}</h3>
+      <button class="copy-btn" (click)="copyChatId()" title="Copiar ID">📋</button>
     </header>
+
+
+
     
     @if (messages.length) {
       <section class="messages">
@@ -24,7 +28,7 @@
         }
       </section>
     } @else {
-      <section class="messages">
+      <section class="no_messages">
         <p>Sem mensagens</p>
       </section>
     }

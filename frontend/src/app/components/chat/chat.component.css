@@ -1,5 +1,6 @@
 /* chat.component.css */
 .chat-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -10,6 +11,10 @@
 }
 
 .chat-header {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;                /* transforma o header em flexbox */
+  justify-content: space-between; /* nome à esquerda, botão à direita */
+  align-items: center;          /* alinha verticalmente na mesma linha */
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(15px);
   color: #e2e8f0;
@@ -19,10 +24,10 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   letter-spacing: 0.5px;
   border-radius: 12px;
-
 }
 
 .messages {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   flex: 1;
   padding: 20px;
   overflow-y: auto;
@@ -31,7 +36,20 @@
   background: rgba(15, 15, 35, 0.7);
 }
 
+.no_messages {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin: 0;
+}
+
 .message {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   margin: 8px 0;
@@ -45,6 +63,7 @@
 }
 
 .message.me {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   align-self: flex-end;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: #fff;
@@ -53,6 +72,7 @@
 }
 
 .message.received {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   align-self: flex-start;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: #fff;
@@ -61,6 +81,7 @@
 }
 
 .author {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-weight: 600;
   font-size: 0.75rem;
   margin-bottom: 4px;
@@ -74,6 +95,7 @@
 }
 
 .text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
   font-size: 0.95rem;
   line-height: 1.4;
   color: #f1f5f9;
@@ -82,4 +104,22 @@
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-name {
+  margin: 0; /* remove margem padrão do h3 */
+  font-size: 1.1rem;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px; /* ligeiramente maior */
+  color: #f3f4f6;
+  transition: color 0.2s;
+}
+
+.copy-btn:hover {
+  color: #fbbf24;
 }
