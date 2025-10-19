@@ -4,6 +4,8 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from dotenv import load_dotenv
+from .ConnectionManager import ConnectionManager
+from . import crud_utils
 
 load_dotenv()
 DB_HOST = os.getenv('DB_HOST')
@@ -31,39 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ConnectionManager:
-    def __init__(self):
-        # store active connections as {room_id: {user_id: WebSocket}}
-        self.active_connections: dict[int, dict[int, WebSocket]] = {}
-
-    async def connect(self, websocket: WebSocket, room_id: int, user_id: int):
-        await websocket.accept()
-        if room_id not in self.active_connections:
-            self.active_connections[room_id] = {} # creates room
-            # create_room(room_id, user_id, room_name) # creates room in database
-        self.active_connections[room_id][user_id] = websocket
-        print(f"WEBSOCKET CONNECTED USER {user_id}; room {room_id}")
-
-    def disconnect(self, room_id: int, user_id: int):
-        if (room_id in self.active_connections) and (user_id in self.active_connections[room_id]):
-            del self.active_connections[room_id][user_id] # removes websocket
-            if not self.active_connections[room_id]: # if no websocket in room, deletes room
-                del self.active_connections[room_id]
-                # delete_room(room_id)
-        print(f"WEBSOCKET DISCONNECTED USER {user_id}; room {room_id}")
-
-    async def broadcast(self, message: str, room_id: int, sender_id: int):
-        # Sends a message to all users in the room
-        if room_id in self.active_connections:
-            for user_id, websocket in self.active_connections[room_id].items():
-                message_with_class = {
-                    "text": message,
-                    "is_self": user_id == sender_id
-                }
-                await websocket.send_json(message_with_class)
-
 manager = ConnectionManager()
-
 
 @app.get("/user/")
 def get_user_info(username):
@@ -128,52 +98,30 @@ def login(username:str):
         msg = f"User '{username}' has logged in"
 
     conn.commit()
-    return {"msg": msg, "warning" : "login currently uses username instead of user_id, this might change"}
+
+    user_info = get_user_info(username)
+
+    return {
+        "msg": msg,
+        "user_id": user_info["user_id"],
+        "user_rooms": user_info["user_rooms"],
+        "user_admins": user_info["user_admins"],
+    }
 
 
 @app.post("/create_room")
 def create_room(
         room_id,
-        room_name,
-        user_id
+        # room_name,
+        user_id,
 ):
-    # check if room exists
-    cur.execute(
-        """SELECT * FROM "Room" WHERE room_id = %s;""",
-        (room_id,)
+    return_msg = crud_utils.create_room(
+        room_id,
+        # room_name,
+        user_id,
     )
+    return return_msg
 
-    if cur.fetchone():
-        return {"msg" : f"Room '{room_id}'already exists"}
-
-    # check if user exists
-    cur.execute(
-        """SELECT * FROM "User" WHERE user_id = %s""",
-        (user_id,)
-    )
-    user = cur.fetchone()
-    if not user_id:
-        return {"msg": f"User of ID '{user_id}' does not exist"}
-
-    # create room
-    cur.execute(
-        """INSERT INTO "Room" (room_id, admin, name) VALUES (%s, %s, %s);""",
-        (room_id, user_id, room_name)
-    )
-
-    # update user in room
-    cur.execute(
-        """INSERT INTO "User_In_Room" (room_id, user_id) VALUES (%s, %s);""",
-        (room_id, user_id)
-    )
-    # maybe check if user is already in room, which should not happen naturally
-
-    conn.commit()
-
-    return {
-        "msg": f"Room '{room_id}' created and admin is user {user[1]}'",
-        "room_id": room_id
-    }
 
 @app.websocket("/ws/{room_id}/{user_id}")
 async def websocket_endpoint(
@@ -200,8 +148,4 @@ async def test_websocket(websocket: WebSocket):
 
 @app.delete("/test/delete_room")
 def delete_room(room_id):
-    cur.execute(
-        """DELETE FROM "Room" WHERE room_id = %s;""",
-        (room_id,)
-    )
-    conn.commit()
+    crud_utils.delete_room(room_id)
