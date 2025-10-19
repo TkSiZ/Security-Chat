@@ -7,6 +7,6 @@ import { ChatComponent } from "../../components/chat/chat.component";
   standalone: true,
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
-  imports: [SidebarComponent]
+  imports: [SidebarComponent, ChatComponent]
 })
 export class HomeComponent {}

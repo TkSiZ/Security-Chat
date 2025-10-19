@@ -6,11 +6,20 @@ import {Message} from '../../types/message'
   providedIn: 'root'
 })
 export class ChatService {
-  private socket: Socket;
+  private socket!: Socket;
 
   constructor() {
-    // TO DO: CHANGE TO THE REAL SOCKET IP
-    this.socket = io('http://localhost:3000')
+  }
+  
+  // TO DO: CHANGE TO THE REAL SOCKET IP
+  connect(): void {
+    this.socket = io('http://localhost:3000/', {
+      autoConnect: true,
+      reconnectionAttempts: 3,
+      timeout: 5000
+    });
+
+    this.socket.on('connect_error', (err) => console.error('Socket connect error', err));
   }
 
   // TO DO: Verify if it should return something
