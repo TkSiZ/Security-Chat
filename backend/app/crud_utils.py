@@ -1,5 +1,6 @@
 import os
 import psycopg2
+from .encryption_utils import *
 from dotenv import load_dotenv
 
 # connection for online postgres database
@@ -96,3 +97,97 @@ def delete_room(room_id):
     conn.close()
 
     print(f"Room '{room_id}' deleted.")
+
+def get_user_info(username):
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT * FROM "User" WHERE username = %s;""",
+        (username,)
+    )
+
+    user = cur.fetchone()
+    if not user:
+        return {"msg" : f"User '{username}' does not exist"}
+
+    user_id = user[0]
+
+    # rooms where user is
+    cur.execute("""SELECT * FROM "User_In_Room" WHERE user_id = %s""", (user_id,))
+
+    user_in_room_rows = cur.fetchall()
+    user_rooms = []
+    for row in user_in_room_rows:
+        user_rooms.append(row[0])
+
+    # rooms user admins
+    user_admins = []
+    for user_room in user_rooms:
+        cur.execute("""SELECT * FROM "Room" WHERE room_id = %s""", (user_room,))
+        room = cur.fetchone()
+        if room[1] == user_id:
+            user_admins.append(room[0])
+
+    cur.close()
+    conn.close()
+
+    return {"user_id" : user_id, "user_rooms": user_rooms, "user_admins": user_admins}
+
+def login(username:str):
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT * FROM "User" WHERE username = %s;""",
+        (username,)
+    )
+
+    user = cur.fetchone()
+
+    private_key = generate_private_key()
+    public_key = generate_public_key(private_key)
+
+    # private key is stored locally # TODO this must be on client
+    with open("local_user_data.txt", "w") as file:
+        file.write(str(private_key))
+
+    if not user: # user didn't exist, must be created
+        cur.execute(
+            """INSERT INTO "User" (username, public_key) VALUES (%s, %s);""",
+            (username, public_key)
+        )
+        msg =  f"User '{username}' was created and has logged in"
+
+    else: # user exists, must be updated
+        cur.execute(
+            """UPDATE "User" SET public_key = (%s) WHERE username = (%s);""",
+            (public_key, username)
+        )
+        msg = f"User '{username}' has logged in"
+
+    conn.commit()
+
+    user_info = get_user_info(username)
+
+    cur.close()
+    conn.close()
+
+    return {
+        "msg": msg,
+        "user_id": user_info["user_id"],
+        "user_rooms": user_info["user_rooms"],
+        "user_admins": user_info["user_admins"],
+    }
