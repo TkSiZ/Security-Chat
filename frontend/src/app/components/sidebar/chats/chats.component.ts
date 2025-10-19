@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { UserContextService } from '../../../services/context/context';
+import { Chat } from '../../../types/chats';
 
 @Component({
   selector: 'app-chats',
@@ -9,18 +10,18 @@ import { UserContextService } from '../../../services/context/context';
 export class ChatsComponent {
   @Input() chatName!: string;
   @Input() chatId!: number;
-  @Input() currentChat!: number | null // TO DO VERIFY IF THIS IS THE TYPE THAT WILL BE USED IN THE FINAL VERSION
+  @Input() currentChat!: Chat | null // TO DO VERIFY IF THIS IS THE TYPE THAT WILL BE USED IN THE FINAL VERSION
 
 
   constructor(private userContext: UserContextService){
     this.userContext.state$.subscribe()
   }
   toggleChat(_chatId: number) {
-    if(this.chatId === this.currentChat){
+    if(this.chatId === this.currentChat?.id){
       this.userContext.updateState({currentChat: null})
     }
     else{
-      this.userContext.updateState({currentChat: _chatId})
+      this.userContext.updateState({currentChat: {id: this.chatId, name: this.chatName}})
     }
     
   }

@@ -13,7 +13,7 @@ import { Chat } from "../../types/chats";
 })
 export class SidebarComponent {
   chats : Chat[] = []
-  currentChat: number | null = null
+  currentChat: Chat | null = null
 
   constructor(private userContext: UserContextService){
     this.userContext.state$.subscribe(state => {
