@@ -3,7 +3,7 @@ import { Chat} from "./chats"
 interface UserContext {
     name : string,
     chats: Chat[],
-    currentChat: number | null
+    currentChat: Chat | null
 }
 
 // TO DO ADD PUBLIC KEY

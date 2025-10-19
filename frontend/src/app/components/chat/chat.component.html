@@ -1,12 +1,12 @@
-@if (currentChat === null){
+@if (currentChat === null) {
   <h3>Selecione um chat</h3>
 } @else {
+  <div class="chat-container">
+    <header class="chat-header">
+      <h3>{{currentChat.name}}</h3>
+    </header>
+    
     @if (messages.length) {
-    <div class="chat-container">
-      <header class="chat-header">
-        <h3>{{ messages[0]?.author }}</h3>
-      </header>
-
       <section class="messages">
         @for (message of messages; track message) {
           <!-- TO DO: CHANGE THIS TO VERIFY THE NAME IN THE CONTEXT -->
@@ -23,12 +23,12 @@
           </div>
         }
       </section>
-
-      <app-text-box (sendMessageChild)="sendMessage($event)"></app-text-box>
-    </div>
-  } @else {
-    <div class="chat-container">
-      <p>Sem mensagens</p>
-    </div>
-  }
+    } @else {
+      <section class="messages">
+        <p>Sem mensagens</p>
+      </section>
+    }
+    
+    <app-text-box (sendMessageChild)="sendMessage($event)"></app-text-box>
+  </div>
 }

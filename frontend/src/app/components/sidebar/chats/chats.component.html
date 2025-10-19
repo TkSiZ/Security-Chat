@@ -1,6 +1,6 @@
 <div 
   class="chat-item"
-  [class.selected]="currentChat === chatId"
+  [class.selected]="currentChat?.id ===  chatId"
   (click)="toggleChat(chatId)"
   >
   <p><strong>{{chatName}}</strong></p>
