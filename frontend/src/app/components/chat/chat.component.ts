@@ -27,6 +27,7 @@ export class ChatComponent {
   }
 
   ngOnInit() : void {
+    this.chatService.connect()
     this.chatService.onMessage((msg: Message) => {
       this.messages.push(msg)
     })
