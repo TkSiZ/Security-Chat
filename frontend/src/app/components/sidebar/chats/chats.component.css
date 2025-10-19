@@ -1,0 +1,37 @@
+/* chats.component.css */
+.chat-item {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.chat-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.chat-item.selected {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.3) 0%, rgba(238, 90, 36, 0.3) 100%);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.chat-item h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 4px 0;
+}
+
+.chat-item p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 4px 0 0;
+  line-height: 1.3;
+}
+

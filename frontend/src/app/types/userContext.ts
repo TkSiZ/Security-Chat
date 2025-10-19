@@ -1,0 +1,10 @@
+import { Chat} from "./chats"
+
+interface UserContext {
+    name : string,
+    chats: Chat[],
+    currentChat: number | null
+}
+
+// TO DO ADD PUBLIC KEY
+export type {UserContext}
