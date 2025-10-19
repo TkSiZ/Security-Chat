@@ -1,4 +1,13 @@
 <div class="home-container">
   <app-sidebar></app-sidebar>
-  <app-chat></app-chat>
+
+  <div class="chat-container">
+    @if (userContext.state.currentChat) {
+      <app-chat></app-chat>
+    } @else {
+      <div class="no-chat-selected">
+        <p>💬 Selecione ou crie um chat para começar</p>
+      </div>
+    }
+  </div>
 </div>

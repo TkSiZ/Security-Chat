@@ -22,16 +22,19 @@
 }
 
 .textbox input::placeholder {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: rgba(255, 255, 255, 0.4);
 }
 
 .textbox input:focus {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(99, 102, 241, 0.6);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .textbox button {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
   border: none;

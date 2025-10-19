@@ -14,6 +14,8 @@ import { Chat } from "../../types/chats";
   styleUrls: ['./chat.component.css']
 })
 
+
+
 export class ChatComponent {
   messages : Message[] = []
   author: string = 'me' // TO DO: Change this to use the user context
@@ -41,5 +43,22 @@ export class ChatComponent {
     
     this.chatService.sendMessage(messagePayload)
   }
+
+  copyChatId(): void {
+    if (!this.currentChat) {
+      console.warn('Nenhum chat selecionado para copiar o ID.');
+      return;
+    }
+
+    navigator.clipboard.writeText(String(this.currentChat.id))
+      .then(() => {
+        console.log('ID do chat copiado:', this.currentChat?.id);
+      })
+      .catch(err => {
+        console.error('Erro ao copiar ID:', err);
+      });
+  }
+
+
 }
 
