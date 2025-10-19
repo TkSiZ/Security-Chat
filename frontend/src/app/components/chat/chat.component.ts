@@ -15,7 +15,6 @@ import { Chat } from "../../types/chats";
 })
 
 export class ChatComponent {
-  messageText: string = ''
   messages : Message[] = []
   author: string = 'me' // TO DO: Change this to use the user context
   currentChat : Chat | null = null
@@ -36,11 +35,11 @@ export class ChatComponent {
 
   sendMessage(message: string): void {
     let messagePayload : Message= {
-      text: this.messageText.trim(),
+      text: message.trim(),
       author: this.author
     }
+    
     this.chatService.sendMessage(messagePayload)
-    this.messageText = ''
   }
 }
 
