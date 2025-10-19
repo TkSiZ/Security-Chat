@@ -5,8 +5,9 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS public."Room"
 (
-    room_id serial NOT NULL,
+    room_id character varying(4)[] NOT NULL,
     admin integer NOT NULL,
+    name character varying(30) NOT NULL,
     PRIMARY KEY (room_id)
 );
 

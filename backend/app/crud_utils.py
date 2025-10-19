@@ -4,7 +4,6 @@ from .encryption_utils import *
 from dotenv import load_dotenv
 
 # connection for online postgres database
-# tables where already created using backend/db/migrations/01_create_tables.sql
 load_dotenv()
 DB_HOST = os.getenv('DB_HOST')
 DB_USER = os.getenv('DB_USER')
@@ -12,17 +11,13 @@ DB_NAME = os.getenv('DB_NAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PORT = os.getenv('DB_PORT')
 
+
 def create_room(
         room_id,
         # room_name,
         user_id,
 ):
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT)
+    conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
 
@@ -73,13 +68,9 @@ def create_room(
         "room_admin": user[1]
     }
 
+
 def delete_room(room_id):
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT)
+    conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
 
@@ -98,13 +89,9 @@ def delete_room(room_id):
 
     print(f"Room '{room_id}' deleted.")
 
+
 def get_user_info(username):
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT)
+    conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
 
@@ -141,12 +128,7 @@ def get_user_info(username):
     return {"user_id" : user_id, "user_rooms": user_rooms, "user_admins": user_admins}
 
 def login(username:str):
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT)
+    conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
 

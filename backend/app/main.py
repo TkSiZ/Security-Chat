@@ -1,7 +1,5 @@
-from .encryption_utils import *
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-import psycopg2
 from .ConnectionManager import ConnectionManager
 from . import crud_utils
 
@@ -16,10 +14,12 @@ app.add_middleware(
 
 manager = ConnectionManager()
 
+
 @app.get("/user/")
 def get_user_info(username):
     return_msg = crud_utils.get_user_info(username)
     return return_msg
+
 
 @app.post("/login")
 def login(username:str):
@@ -59,10 +59,12 @@ async def websocket_endpoint(
         manager.disconnect(room_id, user_id)
         await manager.broadcast(f"'{user_id}' has left the chat.", room_id, user_id)
 
+
 @app.websocket("/fds")
 async def test_websocket(websocket: WebSocket):
     print("test websocket", websocket)
     await websocket.accept()
+
 
 @app.delete("/test/delete_room")
 def delete_room(room_id):
