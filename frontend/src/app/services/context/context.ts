@@ -44,25 +44,6 @@ export class UserContextService {
     });
   }
 
-  connectChat(identifier: string | number) {
-    const state = this._state.value;
-    let found: Chat | undefined;
-
-    if (typeof identifier === 'number' || /^\d+$/.test(String(identifier))) {
-      const idNum = Number(identifier);
-      found = state.chats.find((c) => c.id === idNum);
-    } else {
-      found = state.chats.find((c) => c.name === identifier);
-    }
-
-    if (found) {
-      this._state.next({
-        ...state,
-        currentChat: found,
-      });
-    }
-  }
-
   delState() {
     this._state.next({
       id: null,

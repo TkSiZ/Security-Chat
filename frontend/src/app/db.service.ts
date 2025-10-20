@@ -35,4 +35,14 @@ export class DataService {
     });
   }
 
+  findChat(id: number) : Observable<any>{
+    const url = `${this.baseUrl}/get_room`
+
+    return this.http.get<any>(url, {
+      params: {
+        room_id: id
+      }
+    })
+  }
+
 }

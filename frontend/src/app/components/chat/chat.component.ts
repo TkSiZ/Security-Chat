@@ -59,6 +59,7 @@ private connectToChat(): void {
   this.chatService.connect(this.chatId, this.userId)
     .then(() => {
       this.chatService.onMessage(this.chatId, (msg: Message) => {
+        console.log(msg)
         this.messages.push(msg);
       });
     })

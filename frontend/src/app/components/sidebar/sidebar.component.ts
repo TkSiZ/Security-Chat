@@ -5,6 +5,7 @@ import { ChatsComponent } from './chats/chats.component';
 import { UserContextService } from '../../services/context/context';
 import { Chat, CreateChat } from '../../types/chats';
 import { DataService } from '../../db.service';
+import { ChatService } from '../../services/chat/chat';
 
 @Component({
   selector: 'app-sidebar',
@@ -22,7 +23,7 @@ export class SidebarComponent {
   constructor(
     private userContext: UserContextService,
     private router: Router,
-    private api: DataService
+    private api: DataService,
   ) {
     this.userContext.state$.subscribe(state => {
       this.chats = state.chats;
@@ -58,11 +59,23 @@ export class SidebarComponent {
   }
 
   connectChat(chatConnectInput: HTMLInputElement) {
-    const idOrName = chatConnectInput.value.trim();
-    if (!idOrName) return;
-    this.userContext.connectChat(idOrName);
-    chatConnectInput.value = '';
-    this.showConnectPopup = false;
+    const id = Number(chatConnectInput.value.trim());
+    if (!id){
+      alert("Insira um identificador")
+      return
+    } 
+    this.api.findChat(id).subscribe({
+      next: (roomData: any) => {
+        if(roomData.room_name === "Error: no room"){
+          alert("Sua sala não existe, tente novamente")
+          return
+        }
+        this.userContext.addChat(id, roomData.room_name, roomData.room_admin)
+        chatConnectInput.value = '';
+        this.showConnectPopup = false;
+      }
+    })
+
   }
 
   logout(): void {
