@@ -17,7 +17,8 @@
       <app-chats
         [chatName]="chat.name"
         [chatId]="chat.id"
-        [currentChat]="currentChat">
+        [currentChat]="currentChat"
+        [userId]="userId">
       </app-chats>
     }
   </div>
@@ -31,9 +32,10 @@
   <div class="popup" *ngIf="showCreatePopup">
     <div class="popup-content">
       <h3>Criar novo chat</h3>
+      <input #chatCodeInput type="number" min="1" placeholder="Código do chat"/>
       <input #chatNameInput placeholder="Nome do chat" />
       <div class="popup-actions">
-        <button (click)="createChat(chatNameInput)" class="action-button">Criar</button>
+        <button (click)="createChat(chatNameInput, chatCodeInput)" class="action-button">Criar</button>
         <button (click)="showCreatePopup = false" class="action-button">Cancelar</button>
       </div>
     </div>

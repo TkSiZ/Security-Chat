@@ -7,7 +7,7 @@ import { Message } from '../../types/message';
 })
 export class ChatService {
   private socket?: WebSocket;
-  private readonly WS_URL = 'ws://localhost:3000';
+  private readonly WS_URL = 'ws://192.168.15.159:8000/99/2';
   private isBrowser: boolean;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {

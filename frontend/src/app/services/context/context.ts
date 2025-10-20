@@ -3,8 +3,10 @@ import { BehaviorSubject } from 'rxjs';
 import { Chat } from '../../types/chats';
 
 export interface UserState {
+  id: number | null;
   name: string;
   chats: Chat[];
+  public_key: string
   currentChat: Chat | null;
 }
 
@@ -13,8 +15,10 @@ export interface UserState {
 })
 export class UserContextService {
   private readonly _state = new BehaviorSubject<UserState>({
+    id: null,
     name: '',
     chats: [],
+    public_key: '',
     currentChat: null,
   });
 
@@ -36,14 +40,9 @@ export class UserContextService {
   }
 
   // ✅ Adiciona um novo chat
-  addChat(name: string) {
+  addChat(idInput: number, nameInput: string, adminInput: number) {
     const state = this._state.value;
-    const nextId =
-      state.chats.length > 0
-        ? Math.max(...state.chats.map((c) => c.id)) + 1
-        : 1;
-
-    const newChat: Chat = { id: nextId, name };
+    const newChat: Chat = { id: idInput, name:nameInput, admin: adminInput };
     this._state.next({
       ...state,
       chats: [...state.chats, newChat],
@@ -74,7 +73,9 @@ export class UserContextService {
   // 🔥 Reseta o contexto completamente (logout)
   delState() {
     this._state.next({
+      id: null,
       name: '',
+      public_key: '',
       chats: [],
       currentChat: null,
     });
