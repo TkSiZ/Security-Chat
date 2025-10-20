@@ -20,6 +20,17 @@ def get_user_info(username):
     return_msg = crud_utils.get_user_info(username)
     return return_msg
 
+@app.post("/users/")
+def get_users_info(username_list: list[str]):
+    users_info = []
+    for username in username_list:
+        users_info.append(crud_utils.get_user_info(username))
+
+    return users_info
+
+@app.get("/public_key")
+def get_public_key(username):
+    return crud_utils.get_public_key(username)
 
 @app.post("/login")
 def login(username:str):
@@ -30,12 +41,12 @@ def login(username:str):
 @app.post("/create_room")
 def create_room(
         room_id,
-        # room_name,
+        room_name,
         user_id,
 ):
     return_msg = crud_utils.create_room(
         room_id,
-        # room_name,
+        room_name,
         user_id,
     )
     return return_msg

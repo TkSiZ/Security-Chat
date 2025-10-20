@@ -11,17 +11,34 @@ DB_NAME = os.getenv('DB_NAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PORT = os.getenv('DB_PORT')
 
+def get_public_key(username):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute("""SELECT * FROM "User" WHERE username = %s""",
+                (username,))
+
+    user = cur.fetchone()
+    if not user:
+        return {"public_key" : "error"}
+
+    public_key = user[2]
+
+    cur.close()
+    conn.close()
+
+    return {"public_key" : public_key}
 
 def create_room(
         room_id,
-        # room_name,
+        room_name,
         user_id,
 ):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
 
-    room_name = "DEFAULT"
     # check if room exists
     cur.execute(
         """SELECT * FROM "Room" WHERE room_id = %s;""",
