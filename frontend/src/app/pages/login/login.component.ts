@@ -26,10 +26,6 @@ export class LoginComponent {
       this.api.login(trimmedUsername).subscribe({
         next : (userData: any) => {
           this.userContext.updateState({id: userData.user_id, name: trimmedUsername, chats: userData.user_rooms, public_key: userData.user_public_key})
-          console.log(userData.user_id)
-          console.log(trimmedUsername)
-          console.log(userData.user_rooms)
-          console.log(userData.user_public_key)
           this.router.navigate([`/home/${trimmedUsername}`]);
         }
       })

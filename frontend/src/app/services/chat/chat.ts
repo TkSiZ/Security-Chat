@@ -22,13 +22,13 @@ export class ChatService {
   /**
    * Connect to a chat room via WebSocket
    */
-  connect(roomId: number, userId: number): Promise<void> {
+  connect(roomId: number, userId: number, userName: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.isBrowser) return reject('Not running in browser');
 
       // Remove existing socket for the room
       this.disconnect(roomId);
-      const WS_URL = `ws://localhost:8000/ws/${roomId}/${userId}`;
+      const WS_URL = `ws://localhost:8000/ws/${roomId}/${userId}?user_name=${userName}`;
       console.log(`[ChatService] Connecting to ${WS_URL}`);
 
       const socket = new WebSocket(WS_URL);

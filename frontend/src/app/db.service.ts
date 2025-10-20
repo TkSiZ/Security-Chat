@@ -35,6 +35,16 @@ export class DataService {
     });
   }
 
+  updateUserChat(userIdInput: number, room_id: number): Observable<any> {
+    const url = `${this.baseUrl}/join_room/${room_id}`;
+
+    return this.http.put<any>(url, null, {
+      params: {
+        user_id: userIdInput
+      }
+    });
+  }
+
   findChat(id: number) : Observable<any>{
     const url = `${this.baseUrl}/get_room`
 

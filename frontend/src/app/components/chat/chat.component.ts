@@ -56,7 +56,7 @@ export class ChatComponent implements OnChanges, OnDestroy {
 private connectToChat(): void {
   if (!this.isBrowser || !this.chatId || !this.userId) return;
 
-  this.chatService.connect(this.chatId, this.userId)
+  this.chatService.connect(this.chatId, this.userId, this.userContext.state.name!)
     .then(() => {
       this.chatService.onMessage(this.chatId, (msg: Message) => {
         console.log(msg)

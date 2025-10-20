@@ -5,7 +5,6 @@ import { ChatsComponent } from './chats/chats.component';
 import { UserContextService } from '../../services/context/context';
 import { Chat, CreateChat } from '../../types/chats';
 import { DataService } from '../../db.service';
-import { ChatService } from '../../services/chat/chat';
 
 @Component({
   selector: 'app-sidebar',
@@ -20,6 +19,8 @@ export class SidebarComponent {
   showCreatePopup = false;
   showConnectPopup = false;
   userId: number| null= null 
+  room_id : number| null  = null
+
   constructor(
     private userContext: UserContextService,
     private router: Router,
@@ -60,6 +61,7 @@ export class SidebarComponent {
 
   connectChat(chatConnectInput: HTMLInputElement) {
     const id = Number(chatConnectInput.value.trim());
+    this.room_id = id
     if (!id){
       alert("Insira um identificador")
       return
@@ -71,8 +73,14 @@ export class SidebarComponent {
           return
         }
         this.userContext.addChat(id, roomData.room_name, roomData.room_admin)
+      
         chatConnectInput.value = '';
         this.showConnectPopup = false;
+      }
+    })
+    this.api.updateUserChat(this.userId!, this.room_id).subscribe({
+      next: (roomMessage: any) => {
+        alert("Chat do usuário atualizado no banco")
       }
     })
 
