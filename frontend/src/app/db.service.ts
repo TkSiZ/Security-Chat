@@ -3,13 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserBackendResponse } from './types/userContext';
 import { Chat, CreateChat } from './types/chats';
-import { generatePrivateKey, generatePublicKey } from './utils/encryption';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
-  private baseUrl = 'http://localhost:8000'; 
+  private baseUrl = environment.apiUrl; 
 
   constructor(private http: HttpClient) { }
 

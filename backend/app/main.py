@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
-from ConnectionManager import ConnectionManager
-import crud_utils
+from app.ConnectionManager import ConnectionManager
+import app.crud_utils as crud_utils
+import json
 
 app = FastAPI(title="Zap")
 
@@ -43,6 +44,10 @@ def get_public_key(username):
 def login_route(username: str):
     return crud_utils.login(username)
 
+@app.get("/get_room")
+def get_room(room_id: int = Query(...)):
+    return crud_utils.get_room(room_id)
+
 
 @app.post("/create_room")
 def create_room_route(room_id: int, room_name: str, user_id: int):
@@ -54,28 +59,41 @@ def delete_room_route(room_id: int):
     crud_utils.delete_room(room_id)
     return {"msg": f"Room {room_id} deleted"}
 
+@app.put("/join_room/{room_id}")
+def join_room(user_id, room_id):
+    return crud_utils.join_room(user_id, room_id)
+
 
 @app.websocket("/ws/{room_id}/{user_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
     room_id: int,
     user_id: int,
-    room_name: str = Query(None)
+    user_name: str = Query(...)
 ):
     """
     WebSocket endpoint to connect a user to a room.
     Optional `room_name` query param to create room on first connect.
     """
-    await manager.connect(websocket, room_id, user_id, room_name)
-    await manager.broadcast(f"'{user_id}' has joined the chat {room_id}.", room_id, user_id)
+    await manager.connect(websocket, room_id, user_id)
+    payload = {
+            "author" : "server",
+            "text" : f"{user_name} has joined the chat."
+        }
+    await manager.broadcast(payload, room_id, user_id)
 
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.broadcast(f"'{user_id}': {data}", room_id, user_id)
+            message = json.loads(data)
+            await manager.broadcast(message, room_id, user_id)
     except WebSocketDisconnect:
         manager.disconnect(room_id, user_id)
-        await manager.broadcast(f"'{user_id}' has left the chat.", room_id, user_id)
+        payload = {
+            "author" : "server",
+            "text" : f'{user_name} has left the chat.'
+        }
+        await manager.broadcast(payload, room_id, user_id)
 
 
 @app.websocket("/fds")

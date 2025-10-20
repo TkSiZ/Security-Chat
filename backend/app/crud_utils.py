@@ -1,6 +1,6 @@
 import os
 import psycopg2
-from encryption_utils import *
+from app.encryption_utils import *
 from dotenv import load_dotenv
 
 # connection for online postgres database
@@ -10,6 +10,33 @@ DB_USER = os.getenv('DB_USER')
 DB_NAME = os.getenv('DB_NAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PORT = os.getenv('DB_PORT')
+
+
+def get_room(room_id):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT *
+           FROM "Room"
+           WHERE room_id = %s;""",
+        (room_id,)
+    )
+
+    room = cur.fetchone()
+    if not room:
+        return {
+            "room_name" : "Error: no room",
+            "room_admin" : "Error: no room",
+            "msg" : f"Room {room_id} doesn't exist"
+        }
+
+    return {
+        "room_name" : room[2],
+        "room_admin" : room[1],
+        "msg" : f"Room {room_id} exists!"
+    }
 
 def get_public_key(username):
     conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
@@ -151,6 +178,37 @@ def delete_room(room_id):
 
     print(f"Room '{room_id}' deleted.")
 
+def join_room(user_id, room_id):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute("""SELECT * FROM "Room" WHERE room_id = %s""", (room_id,))
+    room = cur.fetchone()
+    if not room:
+        return {"msg": f"Room {room_id} doesn't exist"}
+
+    room_id = room[0]
+
+    cur.execute("""SELECT * FROM "User" WHERE user_id = %s""", (user_id,))
+    user = cur.fetchone()
+    if not user:
+        return {"msg": f"User {user_id} doesn't exist"}
+
+    cur.execute("""SELECT * FROM "User_In_Room" WHERE room_id = %s AND user_id = %s""",
+                (room_id, user_id))
+
+    check = cur.fetchone()
+    if check:
+        return {"msg" : f"User {user_id} is already in {room_id}"}
+
+    cur.execute("""INSERT INTO "User_In_Room" (room_id, user_id) VALUES (%s, %s) ON CONFLICT DO NOTHING;""",
+                (room_id, user_id))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"msg" : f"User {user_id} inserted into room {room_id}"}
 
 def login(username:str):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)

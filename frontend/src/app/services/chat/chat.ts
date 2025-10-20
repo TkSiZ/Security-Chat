@@ -1,6 +1,7 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Message } from '../../types/message';
+import { environment } from '../../../environments/environment';
 
 interface SocketInfo {
   roomId: number;
@@ -28,7 +29,8 @@ export class ChatService {
 
       // Remove existing socket for the room
       this.disconnect(roomId);
-      const WS_URL = `ws://localhost:8000/ws/${roomId}/${userId}?user_name=${userName}`;
+      const API_SOCKET_URL= environment.apiWebsocket
+      const WS_URL = `${API_SOCKET_URL}/${roomId}/${userId}?user_name=${userName}`;
       console.log(`[ChatService] Connecting to ${WS_URL}`);
 
       const socket = new WebSocket(WS_URL);
