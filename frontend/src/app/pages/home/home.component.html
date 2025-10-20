@@ -3,7 +3,7 @@
 
   <div class="chat-container">
     @if (userContext.state.currentChat) {
-      <app-chat></app-chat>
+      <app-chat [chatId]="currentChatId!" [userId] = "userId!"></app-chat>
     } @else {
       <div class="no-chat-selected">
         <p>💬 Selecione ou crie um chat para começar</p>

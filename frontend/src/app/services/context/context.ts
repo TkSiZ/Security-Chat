@@ -22,15 +22,11 @@ export class UserContextService {
     currentChat: null,
   });
 
-  // estado observável
   state$ = this._state.asObservable();
 
-  // retorna o estado atual (getter)
   get state(): UserState {
     return this._state.value;
   }
-
-  // atualiza parte do estado (merge)
   updateState(newState: Partial<UserState>) {
     const current = this._state.value;
     this._state.next({
@@ -39,7 +35,6 @@ export class UserContextService {
     });
   }
 
-  // ✅ Adiciona um novo chat
   addChat(idInput: number, nameInput: string, adminInput: number) {
     const state = this._state.value;
     const newChat: Chat = { id: idInput, name:nameInput, admin: adminInput };
@@ -49,7 +44,6 @@ export class UserContextService {
     });
   }
 
-  // ✅ Conecta a um chat existente (por nome ou id)
   connectChat(identifier: string | number) {
     const state = this._state.value;
     let found: Chat | undefined;
@@ -61,7 +55,6 @@ export class UserContextService {
       found = state.chats.find((c) => c.name === identifier);
     }
 
-    // Atualiza apenas se encontrar
     if (found) {
       this._state.next({
         ...state,
@@ -70,7 +63,6 @@ export class UserContextService {
     }
   }
 
-  // 🔥 Reseta o contexto completamente (logout)
   delState() {
     this._state.next({
       id: null,

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserBackendResponse } from './types/userContext';
 import { Chat, CreateChat } from './types/chats';
+import { generatePrivateKey, generatePublicKey } from './utils/encryption';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ export class DataService {
 
   login(inputUserName: string): Observable<UserBackendResponse> {
     const url = `${this.baseUrl}/login`;
+
     return this.http.post<UserBackendResponse>(url, null, 
         {
             params: {username: inputUserName}

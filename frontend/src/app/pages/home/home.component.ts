@@ -11,5 +11,12 @@ import { UserContextService } from '../../services/context/context';
   imports: [SidebarComponent, ChatComponent]
 })
 export class HomeComponent {
-  constructor(public userContext: UserContextService) {}
+  userId : number | null = null
+  currentChatId : number | null = null
+  constructor(public userContext: UserContextService) {
+    this.userContext.state$.subscribe(state => {
+      this.userId = state.id
+      this.currentChatId = state.currentChat?.id!
+    })
+  }
 }

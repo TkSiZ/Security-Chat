@@ -22,6 +22,7 @@ export class LoginComponent {
   login() {
     const trimmedUsername = this.username.trim();
     if (trimmedUsername) {
+      console.log("AOwdoiajwdoijawoidj")
       this.api.login(trimmedUsername).subscribe({
         next : (userData: any) => {
           this.userContext.updateState({id: userData.user_id, name: trimmedUsername, chats: userData.user_rooms, public_key: userData.user_public_key})
