@@ -9,14 +9,14 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class DataService {
-  private baseUrl = environment.apiUrl; 
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   login(inputUserName: string): Observable<UserBackendResponse> {
     const url = `${this.baseUrl}/login`;
 
-    return this.http.post<UserBackendResponse>(url, null, 
+    return this.http.post<UserBackendResponse>(url, null,
         {
             params: {username: inputUserName}
         }
@@ -51,6 +51,28 @@ export class DataService {
     return this.http.get<any>(url, {
       params: {
         room_id: id
+      }
+    })
+  }
+
+  deleteChat(id: number) : Observable<any>{
+    // NOTA: isso não foi testado
+    const url = `${this.baseUrl}/test/delete_room`
+
+    return this.http.delete<any>(url, {
+      params: {
+        room_id: id
+      }
+    })
+  }
+
+  getUserPublicKey(user_id: number) : Observable<any>{
+    // NOTA: isso não foi testado
+    const url = `${this.baseUrl}/public_key_by_id`
+
+    return this.http.get<any>(url, {
+      params: {
+        user_id: user_id
       }
     })
   }

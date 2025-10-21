@@ -54,12 +54,16 @@ export class ChatComponent implements OnChanges, OnDestroy {
 }
 
 private connectToChat(): void {
+    // receber a chave 3des do admin criptografado
+    // descriptografar usando a publica do admin e a privada minha
+    // esse 3des vai ser adicionado ao contexto
   if (!this.isBrowser || !this.chatId || !this.userId) return;
 
   this.chatService.connect(this.chatId, this.userId, this.userContext.state.name!)
     .then(() => {
       this.chatService.onMessage(this.chatId, (msg: Message) => {
         console.log(msg)
+        // verificar se é mensagem de texto ou chave?
         this.messages.push(msg);
       });
     })
@@ -81,9 +85,10 @@ private connectToChat(): void {
 }
 
   sendMessage(text: string): void {
+    // criptografar a mensagem usando a chave 3des
     if (!this.chatId || !this.userId || !text.trim()) return;
 
-    const message: Message = { text: text.trim(), author: this.author };
+    const message: Message = { text: text.trim(), author: this.author, is_key: false };
     this.chatService.sendMessage(this.chatId, message);
   }
 
@@ -96,5 +101,18 @@ private connectToChat(): void {
     navigator.clipboard.writeText(String(this.currentChat.id))
       .then(() => console.log('ID do chat copiado:', this.currentChat?.id))
       .catch(err => console.error('Erro ao copiar ID:', err));
+  }
+
+  send3DESKey(key: string, user_id: number): void {
+    // TODO
+    // usar o user_id pra pegar a public key
+    // gerar a DF key usando a public key
+    // usar a DF key no Salsa20 pra criptografar o 3DES
+    // mandar criptografado
+
+    if (!this.chatId || !this.userId || !key.trim()) return;
+
+    const message: Message = { text: key.trim(), author: this.author, is_key: true };
+    this.chatService.sendMessage(this.chatId, message);
   }
 }

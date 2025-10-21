@@ -39,13 +39,32 @@ def get_room(room_id:int):
         "msg" : f"Room {room_id} exists!"
     }
 
-def get_public_key(username:str):
+def get_public_key_by_username(username:str):
     conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
 
     cur.execute("""SELECT * FROM "User" WHERE username = %s""",
                 (username,))
+
+    user = cur.fetchone()
+    if not user:
+        return {"public_key" : "error"}
+
+    public_key = user[2]
+
+    cur.close()
+    conn.close()
+
+    return {"public_key" : public_key}
+
+def get_public_key_by_id(user_id:int):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute("""SELECT * FROM "User" WHERE user_id = %s""",
+                (user_id,))
 
     user = cur.fetchone()
     if not user:

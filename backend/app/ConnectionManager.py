@@ -15,6 +15,7 @@ class ConnectionManager:
         if room_id not in self.active_connections:
             self.active_connections[room_id] = {}  # creates room
         self.active_connections[room_id][user_id] = websocket
+        # mandar 3des pro websocket?
         print(f"WEBSOCKET CONNECTED USER {user_id}; room {room_id}")
 
     def disconnect(self, room_id: int, user_id: int):
@@ -38,7 +39,8 @@ class ConnectionManager:
                 message_with_class = {
                     "author" : message["author"],
                     "text": message["text"],
-                    "is_self": user_id == sender_id
+                    "is_self": user_id == sender_id,
+                    "is_key": message["is_key"]
                 }
                 try:
                     await websocket.send_json(message_with_class)

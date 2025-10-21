@@ -36,9 +36,13 @@ def get_users_info(username_list: list[str]):
 
     return users_info
 
-@app.get("/public_key")
-def get_public_key(username:str):
-    return crud_utils.get_public_key(username)
+@app.get("/public_key_by_username")
+def get_public_key_by_username(username:str):
+    return crud_utils.get_public_key_by_username(username)
+
+@app.get("/public_key_by_id")
+def get_public_key_by_id(user_id:int):
+    return crud_utils.get_public_key_by_id(user_id)
 
 @app.post("/login")
 def login_route(username: str):
@@ -76,9 +80,11 @@ async def websocket_endpoint(
     Optional `room_name` query param to create room on first connect.
     """
     await manager.connect(websocket, room_id, user_id)
+
     payload = {
             "author" : "server",
-            "text" : f"{user_name} has joined the chat."
+            "text" : f"{user_name} has joined the chat.",
+            "is_key" : False
         }
     await manager.broadcast(payload, room_id, user_id)
 
@@ -91,7 +97,8 @@ async def websocket_endpoint(
         manager.disconnect(room_id, user_id)
         payload = {
             "author" : "server",
-            "text" : f'{user_name} has left the chat.'
+            "text" : f'{user_name} has left the chat.',
+            "is_key": False
         }
         await manager.broadcast(payload, room_id, user_id)
 
