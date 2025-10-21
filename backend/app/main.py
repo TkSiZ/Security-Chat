@@ -37,7 +37,7 @@ def get_users_info(username_list: list[str]):
     return users_info
 
 @app.get("/public_key")
-def get_public_key(username):
+def get_public_key(username:str):
     return crud_utils.get_public_key(username)
 
 @app.post("/login")
@@ -60,7 +60,7 @@ def delete_room_route(room_id: int):
     return {"msg": f"Room {room_id} deleted"}
 
 @app.put("/join_room/{room_id}")
-def join_room(user_id, room_id):
+def join_room(user_id:int, room_id:int):
     return crud_utils.join_room(user_id, room_id)
 
 
@@ -95,8 +95,15 @@ async def websocket_endpoint(
         }
         await manager.broadcast(payload, room_id, user_id)
 
+    # TODO: find out where broadcast_3DES_key fits in all this
+
 
 @app.websocket("/fds")
 async def test_websocket(websocket: WebSocket):
     print("test websocket", websocket)
     await websocket.accept()
+
+@app.get("/is_admin")
+def is_admin_of_room(user_id: int, room_id: int):
+    return crud_utils.is_admin_of_room(user_id, room_id)
+

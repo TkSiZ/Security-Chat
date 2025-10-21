@@ -142,3 +142,4 @@ vite.config.ts.timestamp-*
 .idea/
 *.pyc
 backend/app/local_user_data.txt
+*.txt

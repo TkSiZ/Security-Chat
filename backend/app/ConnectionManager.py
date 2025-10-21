@@ -44,3 +44,26 @@ class ConnectionManager:
                     await websocket.send_json(message_with_class)
                 except Exception as e:
                     print(f"Failed to send message to user {user_id}: {e}")
+
+
+    async def broadcast_3DES_key(
+            self,
+            key, # not sure whether it will be str or int
+            room_id: int,
+            sender_id: int
+    ):
+        """Sends the cryptographed 3DES room key to every user in room"""
+        # TODO: this has not been tested or frontend approved
+        if room_id in self.active_connections:
+            for user_id, websocket in self.active_connections[room_id].items():
+                message_with_class = {
+                    "sender_id" : sender_id,
+                    "key": key,
+                    "is_self": user_id == sender_id
+                }
+                try:
+                    await websocket.send_json(message_with_class)
+                except Exception as e:
+                    print(f"Failed to send message to user {user_id}: {e}")
+        else:
+            print(f"Failed to broadcast 3DES key to room {room_id}: Room not found")

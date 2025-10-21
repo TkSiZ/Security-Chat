@@ -1,6 +1,7 @@
 import os
 import psycopg2
-from app.encryption_utils import *
+# from app.encryption_utils import *
+from .encryption_utils import * # this is what works for Vini
 from dotenv import load_dotenv
 
 # connection for online postgres database
@@ -12,7 +13,7 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PORT = os.getenv('DB_PORT')
 
 
-def get_room(room_id):
+def get_room(room_id:int):
     conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
@@ -38,7 +39,7 @@ def get_room(room_id):
         "msg" : f"Room {room_id} exists!"
     }
 
-def get_public_key(username):
+def get_public_key(username:str):
     conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
@@ -58,9 +59,9 @@ def get_public_key(username):
     return {"public_key" : public_key}
 
 def create_room(
-        room_id,
-        room_name,
-        user_id,
+        room_id:int,
+        room_name:str,
+        user_id:int,
 ):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
@@ -111,7 +112,7 @@ def create_room(
         "room_name": room_name,
         "room_admin": user[1]
     }
-def get_user_info(username):
+def get_user_info(username:str):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
@@ -158,7 +159,7 @@ def get_user_info(username):
 
     return {"user_id" : user_id, "user_rooms": user_rooms, "user_admins": user_admins}
 
-def delete_room(room_id):
+def delete_room(room_id:int):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
@@ -178,7 +179,7 @@ def delete_room(room_id):
 
     print(f"Room '{room_id}' deleted.")
 
-def join_room(user_id, room_id):
+def join_room(user_id:int, room_id:int):
     conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
@@ -257,3 +258,26 @@ def login(username:str):
         "user_rooms": user_info["user_rooms"],
         "user_admins": user_info["user_admins"],
     }
+
+def is_admin_of_room(user_id:int, room_id:int):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute("""SELECT * FROM "User" WHERE user_id = %s""", (user_id,))
+
+    user = cur.fetchone()
+    if not user:
+        return {"status code" : -1, "msg" : f"user {user_id} does not exist"}
+
+    cur.execute("""SELECT * FROM "Room" WHERE room_id = %s""", (room_id,))
+    room = cur.fetchone()
+    if not room:
+        return {"status code" : -1, "msg" : f"room {room_id} does not exist"}
+
+    admin_id = room[1]
+
+    if user_id == admin_id:
+        return {"status code" : 1, "msg" : f"User '{user_id}' is admin of room '{room_id}'"}
+    else:
+        return {"status code": 0, "msg": f"User '{user_id}' is NOT admin of room '{room_id}'. Admin is user '{admin_id}'"}
