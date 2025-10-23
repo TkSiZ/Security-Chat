@@ -77,6 +77,27 @@ def get_public_key_by_id(user_id:int):
 
     return {"public_key" : public_key}
 
+def get_public_keys(users: list[int]):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute("""SELECT user_id, public_key
+                   FROM "User"
+                   WHERE user_id IN %s""",
+                (tuple(users),))
+
+    query = cur.fetchall()
+
+    keys_dict = {}
+    for row in query:
+        keys_dict[row[0]] = row[1]
+
+    cur.close()
+    conn.close()
+
+    return keys_dict
+
 def create_room(
         room_id:int,
         room_name:str,
@@ -270,6 +291,7 @@ def login(username:str):
     cur.close()
     conn.close()
 
+    print(f"User {username} logged in")
     return {
         "msg": msg,
         "user_id": user_info["user_id"],

@@ -85,10 +85,10 @@ private connectToChat(): void {
 }
 
   sendMessage(text: string): void {
-    // criptografar a mensagem usando a chave 3des
+    // TODO: criptografar a mensagem usando a chave 3des
     if (!this.chatId || !this.userId || !text.trim()) return;
 
-    const message: Message = { text: text.trim(), author: this.author, is_key: false };
+    const message: Message = { text: text.trim(), author: this.author, type: "MSG", destination: null };
     this.chatService.sendMessage(this.chatId, message);
   }
 
@@ -112,7 +112,7 @@ private connectToChat(): void {
 
     if (!this.chatId || !this.userId || !key.trim()) return;
 
-    const message: Message = { text: key.trim(), author: this.author, is_key: true };
+    const message: Message = { text: key.trim(), author: this.author, type: "MSG", destination: null };
     this.chatService.sendMessage(this.chatId, message);
   }
 }

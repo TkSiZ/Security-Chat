@@ -4,7 +4,9 @@ from app.crud_utils import create_room, delete_room
 class ConnectionManager:
     def __init__(self):
         # store active connections as {room_id: {user_id: WebSocket}}
-        self.active_connections: dict[int, dict[int, WebSocket]] = {}
+        # inside the room_id dict, there can also be {public_key : cryptographed 3des key}
+        # NOTE: I don't know if keys will be str or int, so I put both types
+        self.active_connections: dict[int, dict[int | str, int | str | WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, room_id: int, user_id: int):
         """
@@ -15,7 +17,7 @@ class ConnectionManager:
         if room_id not in self.active_connections:
             self.active_connections[room_id] = {}  # creates room
         self.active_connections[room_id][user_id] = websocket
-        # mandar 3des pro websocket?
+
         print(f"WEBSOCKET CONNECTED USER {user_id}; room {room_id}")
 
     def disconnect(self, room_id: int, user_id: int):
@@ -36,36 +38,13 @@ class ConnectionManager:
         """
         if room_id in self.active_connections:
             for user_id, websocket in self.active_connections[room_id].items():
-                message_with_class = {
+                payload = {
                     "author" : message["author"],
                     "text": message["text"],
-                    "is_self": user_id == sender_id,
-                    "is_key": message["is_key"]
+                    "type": message["type"],
+                    "destination": message["destination"]
                 }
                 try:
-                    await websocket.send_json(message_with_class)
+                    await websocket.send_json(payload)
                 except Exception as e:
                     print(f"Failed to send message to user {user_id}: {e}")
-
-
-    async def broadcast_3DES_key(
-            self,
-            key, # not sure whether it will be str or int
-            room_id: int,
-            sender_id: int
-    ):
-        """Sends the cryptographed 3DES room key to every user in room"""
-        # TODO: this has not been tested or frontend approved
-        if room_id in self.active_connections:
-            for user_id, websocket in self.active_connections[room_id].items():
-                message_with_class = {
-                    "sender_id" : sender_id,
-                    "key": key,
-                    "is_self": user_id == sender_id
-                }
-                try:
-                    await websocket.send_json(message_with_class)
-                except Exception as e:
-                    print(f"Failed to send message to user {user_id}: {e}")
-        else:
-            print(f"Failed to broadcast 3DES key to room {room_id}: Room not found")

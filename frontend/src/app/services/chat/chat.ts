@@ -90,6 +90,7 @@ export class ChatService {
    * Register a callback for incoming messages
    */
   onMessage(roomId: number, callback: (message: Message) => void): void {
+    // TODO
     const socketInfo = this.sockets.find(s => s.roomId === roomId);
     if (!socketInfo) {
       console.warn(`[ChatService] WebSocket for room ${roomId} not connected yet.`);

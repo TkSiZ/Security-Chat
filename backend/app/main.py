@@ -20,14 +20,6 @@ manager = ConnectionManager()
 def get_user_info(username: str):
     return crud_utils.get_user_info(username)
 
-
-@app.post("/users/")
-def get_users_info(username_list: list[str]):
-    users_info = []
-    for username in username_list:
-        users_info.append(crud_utils.get_user_info(username))
-    return users_info
-
 @app.post("/users/")
 def get_users_info(username_list: list[str]):
     users_info = []
@@ -43,6 +35,10 @@ def get_public_key_by_username(username:str):
 @app.get("/public_key_by_id")
 def get_public_key_by_id(user_id:int):
     return crud_utils.get_public_key_by_id(user_id)
+
+@app.post("/public_keys")
+def get_public_keys(users: list[int]):
+    return crud_utils.get_public_keys(users)
 
 @app.post("/login")
 def login_route(username: str):
@@ -84,7 +80,8 @@ async def websocket_endpoint(
     payload = {
             "author" : "server",
             "text" : f"{user_name} has joined the chat.",
-            "is_key" : False
+            "type" : "MSG",
+            "destination": None
         }
     await manager.broadcast(payload, room_id, user_id)
 
@@ -98,7 +95,8 @@ async def websocket_endpoint(
         payload = {
             "author" : "server",
             "text" : f'{user_name} has left the chat.',
-            "is_key": False
+            "type": "MSG", # "KEY" "MSG",
+            "destination": None
         }
         await manager.broadcast(payload, room_id, user_id)
 
