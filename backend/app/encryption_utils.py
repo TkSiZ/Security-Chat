@@ -62,7 +62,7 @@ def generate_shared_key_from_df(priv_key_a, pub_key_b):
         length=DF_KEY_LENGTH,
     )
 
-    key = hkdf.derive(b'secret')
+    key = hkdf.derive(secret.to_bytes(384, "big"))
 
     return key
 

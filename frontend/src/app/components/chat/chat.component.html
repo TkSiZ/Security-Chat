@@ -1,0 +1,36 @@
+@if (currentChat === null) {
+  <h3>Selecione um chat</h3>
+} @else {
+  <div class="chat-container">
+    <header class="chat-header">
+      <h3 class="chat-name">{{ currentChat.name || 'Selecione um chat' }}</h3>
+      <button class="copy-btn" (click)="copyChatId()" title="Copiar ID">📋</button>
+    </header>
+
+
+
+    
+    @if (messages.length) {
+      <section class="messages">
+        @for (message of messages; track message) {
+          <div
+            class="message"
+            [class.me]="message.author === author"  
+            [class.received]="message.author !== author"
+          >
+            <div class="author">
+              {{ message.author === 'me' ? 'You' : message.author }}
+            </div>
+            <div class="text">{{message.text}}</div>
+          </div>
+        }
+      </section>
+    } @else {
+      <section class="no_messages">
+        <p>Sem mensagens</p>
+      </section>
+    }
+    
+    <app-text-box (sendMessageChild)="sendMessage($event)"></app-text-box>
+  </div>
+}

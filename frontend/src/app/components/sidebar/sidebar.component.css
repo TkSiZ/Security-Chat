@@ -1,0 +1,133 @@
+.sidebar {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #1e1e2f;
+  color: #ffffff;
+  position: relative;
+}
+
+.sidebar-header {
+  background-color: #2a2a40;
+  padding: 15px;
+  border-bottom: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.sidebar-header h2 {
+  margin: 0 0 16px 0;    
+  font-size: 1.5rem;  
+  font-weight: 700;
+  color: #f1f1f1;
+  text-align: center; 
+}
+
+
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-chats {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #23233b;
+  padding: 10px;
+}
+
+.sidebar-footer {
+  background: #2a2a40;
+  border-top: 1px solid #333;
+  padding: 10px;
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+/* Botões gerais */
+.action-button {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #3f51b5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.action-button:hover {
+  background-color: #5c6bc0;
+}
+
+/* Botão cancelar (popup) */
+.action-button.cancel {
+  background-color: #555;
+}
+
+.action-button.cancel:hover {
+  background-color: #666;
+}
+
+/* Botão de sair */
+.logout-button {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  background-color: #d32f2f;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #b71c1c;
+}
+
+/* Popups */
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background: #2a2a40;
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centraliza o input e outros filhos */
+}
+
+.popup-content input {
+  width: 80%;              /* ocupa 80% da largura do popup */
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background-color: #1e1e2f;
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}

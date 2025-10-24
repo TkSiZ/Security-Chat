@@ -1,0 +1,38 @@
+.home-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: #151517;
+}
+
+app-sidebar {
+  width: 300px;
+  border-right: 1px solid #151517;
+}
+
+app-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  background-color: #1e1e2f;
+  color: #aaa;
+}
+
+.no-chat-selected {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin: 0;
+}
