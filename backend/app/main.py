@@ -17,7 +17,7 @@ app.add_middleware(
 manager = ConnectionManager()
 
 # { user_id : private_key }
-app.private_keys = {} # will start empty
+app.private_keys = {} # will be empty on restart
 
 @app.get("/test/get_private_keys") # NOTE: this is for test reasons only and should not be in final version
 def get_private_keys():
@@ -115,6 +115,7 @@ async def websocket_endpoint(
             await manager.broadcast(message, room_id, user_id)
     except WebSocketDisconnect:
         manager.disconnect(room_id, user_id)
+        del app.private_keys[user_id] # deletes private key of disconnected user for storage reasons
         payload = {
             "author" : "server",
             "text" : f'{user_name} has left the chat.',

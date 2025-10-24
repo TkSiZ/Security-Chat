@@ -3,6 +3,7 @@ import psycopg2
 # from app.encryption_utils import *
 from .encryption_utils import * # this is what works for Vini
 from dotenv import load_dotenv
+from fastapi import WebSocket
 
 # connection for online postgres database
 load_dotenv()
@@ -11,6 +12,58 @@ DB_USER = os.getenv('DB_USER')
 DB_NAME = os.getenv('DB_NAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PORT = os.getenv('DB_PORT')
+
+def new_admin(user_id:int, room_id:int):
+    """When a user connects to the websocket, this function is called to add them as an admin when the room is empty"""
+    # NOTE: this function doesn't check if room is actually empty; this is checked in ConnectionManager.connect()
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+    cur = conn.cursor()
+
+    cur.execute(
+        """UPDATE "Room"
+           SET admin = (%s)
+           WHERE room_id = (%s);""",
+        (user_id, room_id)
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    print(f"[DEBUG] New Admin of room '{room_id}' is '{user_id}'")
+
+def update_admin(user_id:int, room_id:int, users_in_room : dict[int, WebSocket]):
+    """When a user disconnects from a websocket, this function should be called to update admin"""
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+    cur = conn.cursor()
+
+    cur.execute("""SELECT admin FROM "Room" WHERE room_id = %s""", (room_id,))
+
+    admin = cur.fetchone()
+    if user_id == admin[0] or not admin[0]: # if user that left is admin, or if admin is None (should not happen naturally)
+        users_in_room = list(users_in_room.keys())
+        if users_in_room:
+            new_admin = users_in_room[0]
+            cur.execute(
+                """UPDATE "Room" SET admin = (%s) WHERE room_id = (%s);""",
+                (new_admin, room_id)
+            )
+            msg = {"msg" : f"Room '{room_id}': previous admin '{admin[0]}' replaced by user '{new_admin}'"}
+        else:
+            cur.execute(
+                """UPDATE "Room" SET admin = NULL WHERE room_id = (%s);""",
+                (room_id, )
+            )
+            msg = {"msg": f"Room '{room_id}': previous admin '{admin[0]}' left, leaving chat empty'"}
+
+        conn.commit()
+    else:
+        msg =  {"msg" : f"User '{user_id}' is not admin '{admin[0]}' of room '{room_id}'. No need to update admin."}
+
+    cur.close()
+    conn.close()
+
+    print(f"[DEBUG] {msg["msg"]}")
+    return msg
 
 
 def get_room(room_id:int):
