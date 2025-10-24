@@ -266,10 +266,6 @@ def login(username:str):
     private_key = generate_private_key()
     public_key = generate_public_key(private_key)
 
-    # private key is stored locally # TODO this must be on client
-    with open(f"{username}_local_user_data.txt", "w") as file:
-        file.write(str(private_key))
-
     if not user: # user didn't exist, must be created
         cur.execute(
             """INSERT INTO "User" (username, public_key) VALUES (%s, %s);""",
@@ -295,9 +291,9 @@ def login(username:str):
     return {
         "msg": msg,
         "user_id": user_info["user_id"],
-        "private_key": private_key,
         "user_rooms": user_info["user_rooms"],
         "user_admins": user_info["user_admins"],
+        "private_key": str(private_key)
     }
 
 def is_admin_of_room(user_id:int, room_id:int):

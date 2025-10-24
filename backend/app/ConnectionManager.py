@@ -1,12 +1,10 @@
 from fastapi import WebSocket
-from app.crud_utils import create_room, delete_room
+from app.utils import create_room, delete_room
 
 class ConnectionManager:
     def __init__(self):
         # store active connections as {room_id: {user_id: WebSocket}}
-        # inside the room_id dict, there can also be {public_key : cryptographed 3des key}
-        # NOTE: I don't know if keys will be str or int, so I put both types
-        self.active_connections: dict[int, dict[int | str, int | str | WebSocket]] = {}
+        self.active_connections: dict[int, dict[int, WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, room_id: int, user_id: int):
         """
@@ -34,7 +32,6 @@ class ConnectionManager:
     async def broadcast(self, message: dict, room_id: int, sender_id: int):
         """
         Sends a message to all users in the room.
-        Marks messages with `is_self` if the sender is the same user.
         """
         if room_id in self.active_connections:
             for user_id, websocket in self.active_connections[room_id].items():
