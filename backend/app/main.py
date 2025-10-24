@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from app.ConnectionManager import ConnectionManager
 import app.utils as utils
@@ -16,8 +16,13 @@ app.add_middleware(
 
 manager = ConnectionManager()
 
+# NOTE: private and public keys are treated as strings to transmit in messages
 # { user_id : private_key }
 app.private_keys = {} # will be empty on restart
+
+# NOTE: 3des key is treated as bytes
+# { room_id : uncryptographed 3des key (bytes) }
+app.keys_3des = {}
 
 @app.get("/test/get_private_keys") # NOTE: this is for test reasons only and should not be in final version
 def get_private_keys():
@@ -27,6 +32,40 @@ def get_private_keys():
     else:
         print(f"[DEBUG] GET PRIVATE KEYS: {app.private_keys}")
         return app.private_keys
+
+@app.get("/test/get_3des_key")
+def get_3des_key(room_id:int):
+    """
+    Returns the specified room 3DES key, NOT cryptographed.
+    Specifically, it returns a Response object, and the key is Response.body
+    """
+    if not app.keys_3des:
+        print("[DEBUG] no 3des keys stored")
+        return {"msg" : "No 3des keys stored"}
+    else:
+        print(f"[DEBUG] GET ALL 3DES KEYS: {app.keys_3des}")
+        response = Response(content=app.keys_3des[room_id])  # returns only the specified room key
+        key = response.body
+        print(f"[DEBUG] Response key: {key}")
+        return response
+
+@app.get("/test/test_3des_key")
+def test_3des_key(room_id:int):
+    """
+    Tests if the key received from /test/get_3des_key is the same as the one in dictionary app.keys_3des.
+    In other words, it tests if the key was somehow changed or corrupted when being transmitted.
+    Of course, this is all in backend. Doesn't test keys being sent to or received from frontend
+    """
+    key = get_3des_key(room_id).body
+    print(f"key type:{type(key)}")
+    try:
+        assert key == app.keys_3des[room_id], "[DEBUG] [Failure] Key that was received is not equal to same key in app.keys_3des"
+        print(f"[DEBUG] [Success] Key that was received is equal to same key in app.keys_3des")
+    except AssertionError as e:
+        print(e)
+        print(f"[DEBUG] [Failure] Key received: {key} (type {type(key)})")
+        print(f"[DEBUG] [Failure] Key in app.keys_3des: {app.keys_3des[room_id]} (type {type(app.keys_3des[room_id])}")
+    return
 
 @app.get("/user/")
 def get_user_info(username: str):
@@ -72,8 +111,10 @@ def get_room(room_id: int = Query(...)):
 
 
 @app.post("/create_room")
-def create_room_route(room_id: int, room_name: str, user_id: int):
-
+def create_room(room_id: int, room_name: str, user_id: int):
+    key_3des = generate_3des_key()
+    app.keys_3des[room_id] = key_3des
+    print(key_3des)
     return utils.create_room(room_id, room_name, user_id)
 
 
