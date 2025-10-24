@@ -304,7 +304,8 @@ def join_room(user_id:int, room_id:int):
     conn.close()
     return {"msg" : f"User {user_id} inserted into room {room_id}"}
 
-def login(username:str):
+def login(username:str, public_key:str):
+    """Creates/updates user info in database. Requires public_key generated in client frontend"""
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
@@ -315,9 +316,6 @@ def login(username:str):
     )
 
     user = cur.fetchone()
-
-    private_key = generate_private_key()
-    public_key = generate_public_key(private_key)
 
     if not user: # user didn't exist, must be created
         cur.execute(
@@ -346,7 +344,6 @@ def login(username:str):
         "user_id": user_info["user_id"],
         "user_rooms": user_info["user_rooms"],
         "user_admins": user_info["user_admins"],
-        "private_key": str(private_key)
     }
 
 def is_admin_of_room(user_id:int, room_id:int):
