@@ -21,6 +21,7 @@ class ConnectionManager:
         else:
             if not self.active_connections[room_id]: # if room is empty
                 new_admin(user_id, room_id) # register new admin
+        print(self.active_connections)
         self.active_connections[room_id][user_id] = websocket
 
         print(f"WEBSOCKET CONNECTED USER {user_id}; room {room_id}")
@@ -46,6 +47,7 @@ class ConnectionManager:
             for user_id, websocket in self.active_connections[room_id].items():
                 payload = {
                     "author" : message["author"],
+                    "user_id": message["user_id"],
                     "text": message["text"],
                     "type": message["type"],
                     "destination": message["destination"]

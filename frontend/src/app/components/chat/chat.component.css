@@ -47,7 +47,17 @@
   opacity: 0.8;
   margin: 0;
 }
-
+.loading{
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin: 0;
+}
 .message {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: rgba(255, 255, 255, 0.08);

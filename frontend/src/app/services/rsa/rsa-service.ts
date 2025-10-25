@@ -51,6 +51,40 @@ export class RsaService {
     return new TextDecoder().decode(decrypted);
   }
 
+async importPrivateKey(pem: string): Promise<CryptoKey> {
+  const pemContents = pem
+    .replace("-----BEGIN PRIVATE KEY-----", "")
+    .replace("-----END PRIVATE KEY-----", "")
+    .replace(/\n/g, "");
+
+  const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+  
+  return await crypto.subtle.importKey(
+    "pkcs8",
+    binaryDer,
+    { name: "RSA-OAEP", hash: "SHA-256" },
+    true,
+    ["decrypt"]
+  );
+}
+
+async importPublicKey(pem: string): Promise<CryptoKey> {
+  const pemContents = pem
+    .replace("-----BEGIN PUBLIC KEY-----", "")
+    .replace("-----END PUBLIC KEY-----", "")
+    .replace(/\n/g, "");
+
+  const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+
+  return await crypto.subtle.importKey(
+    "spki",
+    binaryDer,
+    { name: "RSA-OAEP", hash: "SHA-256" },
+    true,
+    ["encrypt"]
+  );
+}
+
 
   // Helper
   private arrayBufferToString(buffer: ArrayBuffer): string {

@@ -31,10 +31,13 @@ export class LoginComponent {
   this.isButtonDisabled = true;
   const trimmedUsername = this.username.trim();
   if (!trimmedUsername) return;
-
+  console.log("Generating PUBLIC AND PRIVATE KEY")
   const { publicKey, privateKey } = await this.rsa.generateRSAKeyPair();
+
   const publicPem = await this.rsa.exportPublicKey(publicKey);
+  console.log("PUBLIC_KEY:", publicPem)
   const privatePem = await this.rsa.exportPrivateKey(privateKey);
+  console.log("PRIVATE_KEY:", privatePem)
   console.log("Terminou de gerar as keys")
 
   // Se tiver persistencia de login tem q ver essa parada aqui

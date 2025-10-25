@@ -10,7 +10,7 @@ import { Chat } from '../../../types/chats';
 export class ChatsComponent {
   @Input() chatName!: string;
   @Input() chatId!: number;
-  @Input() userId!:number | null;
+  @Input() admin!:number | null;
   @Input() currentChat!: Chat | null // TO DO VERIFY IF THIS IS THE TYPE THAT WILL BE USED IN THE FINAL VERSION
 
 
@@ -22,7 +22,7 @@ export class ChatsComponent {
       this.userContext.updateState({currentChat: null})
     }
     else{
-      this.userContext.updateState({currentChat: {id: this.chatId, name: this.chatName, admin: this.userId!}})
+      this.userContext.updateState({currentChat: {id: this.chatId, name: this.chatName, admin: this.admin!}})
     }
     
   }

@@ -30,6 +30,15 @@ def get_users_in_room(room_id:int):
 def get_user_info(username: str):
     return utils.get_user_info(username)
 
+@app.get("/users_in_room")
+def get_users_in_room(room_id:int):
+    """Returns users connected to the room websocket, NOT the users through User_In_Room table"""
+    ac = manager.get_active_connections()
+    if room_id not in ac or not ac[room_id]:
+        return {"msg": f"Room {room_id} has no users or doesn't exist"}
+    else:
+        return {"users" : list(ac[room_id].keys())}
+    
 
 @app.post("/users/")
 def get_users_info(username_list: list[str]):
@@ -56,7 +65,7 @@ def get_public_keys(users: list[int]):
 
 
 @app.post("/login")
-def login(username: str, public_key:str):
+def login_route(username: str, public_key: str):
     return utils.login(username, public_key)
 
 @app.get("/get_room")
@@ -92,13 +101,14 @@ async def websocket_endpoint(
     """
     await manager.connect(websocket, room_id, user_id)
 
-    payload = {
-            "author" : "server",
-            "text" : f"{user_name} has joined the chat.",
-            "type" : "MSG", # "KEY" "MSG",
-            "destination": None
-        }
-    await manager.broadcast(payload, room_id, user_id)
+    # payload = {
+    #         "author" : "server",
+    #         "user_id": user_id,
+    #         "text" : f"{user_name} has joined the chat.",
+    #         "type" : "JOIN", # "KEY" "MSG" "JOIN" "EXIT", 
+    #         "destination": None
+    #     }
+    # await manager.broadcast(payload, room_id, user_id)
 
     try:
         while True:
@@ -109,8 +119,9 @@ async def websocket_endpoint(
         manager.disconnect(room_id, user_id)
         payload = {
             "author" : "server",
+            "user_id": user_id,
             "text" : f'{user_name} has left the chat.',
-            "type": "MSG", # "KEY" "MSG",
+            "type": "EXIT", # "KEY" "MSG" "JOIN" "EXIT",
             "destination": None
         }
         await manager.broadcast(payload, room_id, user_id)
@@ -119,6 +130,10 @@ async def websocket_endpoint(
 @app.get("/is_admin")
 def is_admin_of_room(user_id: int, room_id: int):
     return utils.is_admin_of_room(user_id, room_id)
+
+@app.get("/updatedChat")
+def get_updated_chat(user_name : str):
+    return utils.updated_chats(user_name)
 
 # @app.get("/test/get_private_keys") # NOTE: this is for test reasons only and should not be in final version
 # def get_private_keys():

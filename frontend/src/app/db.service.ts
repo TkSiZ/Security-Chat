@@ -90,4 +90,24 @@ export class DataService {
       }
       })
   }
+
+  getAllUsersInChat(chat_id: number): Observable<any>{
+    const url = `${this.baseUrl}/users_in_room`
+
+    return this.http.get<any>(url,{
+      params: {
+       room_id : chat_id 
+      }
+    })
+  }
+
+  getPublicKeyByUserId(userIdInput: number): Observable<any>{
+    const url = `${this.baseUrl}/public_key_by_id`
+
+    return this.http.get<any>(url, {
+      params:{
+        user_id: userIdInput
+      }
+    })
+  }
 }

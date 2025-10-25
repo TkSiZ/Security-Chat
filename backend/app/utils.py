@@ -31,6 +31,37 @@ def new_admin(user_id:int, room_id:int):
     conn.close()
     print(f"[DEBUG] New Admin of room '{room_id}' is '{user_id}'")
 
+def updated_chats(user_name: str):
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT * FROM "User" WHERE username = %s;""",
+        (user_name,)
+    )
+
+    user = cur.fetchone()
+
+    # Get full user info
+    user_info = get_user_info(user_name)
+
+    cur.close()
+    conn.close()
+
+    print(f"User {user_name} logged in")
+
+    return {
+        "user_rooms": user_info["user_rooms"],
+    }
+
+
 def update_admin(user_id:int, room_id:int, users_in_room : dict[int, WebSocket]):
     """When a user disconnects from a websocket, this function should be called to update admin"""
     conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)

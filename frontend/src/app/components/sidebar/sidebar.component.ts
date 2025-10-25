@@ -47,10 +47,11 @@ export class SidebarComponent {
         room_name: roomNameInput
       }
 
+      console.log(payload)
       console.log(roomNameInput)
       this.api.createChat(payload).subscribe({
         next: (roomData: any) => {
-        this.userContext.addChat(roomData.room_id, roomData.room_name, roomData.room)
+        this.userContext.addChat(roomData.room_id, roomData.room_name, this.userId!)
         }
       })
       chatNameInput.value = ''
