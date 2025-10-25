@@ -16,6 +16,15 @@ app.add_middleware(
 
 manager = ConnectionManager()
 
+@app.get("/users_in_room/")
+def get_users_in_room(room_id:int):
+    """Returns users connected to the room websocket, NOT the users through User_In_Room table"""
+    ac = manager.get_active_connections()
+    if room_id not in ac or not ac[room_id]:
+        return {"msg": f"Room {room_id} has no users or doesn't exist"}
+    else:
+        return list(ac[room_id].keys())
+    
 
 @app.get("/user/")
 def get_user_info(username: str):
@@ -47,8 +56,8 @@ def get_public_keys(users: list[int]):
 
 
 @app.post("/login")
-def login_route(username: str):
-    return utils.login(username)
+def login(username: str, public_key:str):
+    return utils.login(username, public_key)
 
 @app.get("/get_room")
 def get_room(room_id: int = Query(...)):
@@ -98,7 +107,6 @@ async def websocket_endpoint(
             await manager.broadcast(message, room_id, user_id)
     except WebSocketDisconnect:
         manager.disconnect(room_id, user_id)
-        del app.private_keys[user_id] # deletes private key of disconnected user for storage reasons
         payload = {
             "author" : "server",
             "text" : f'{user_name} has left the chat.',

@@ -6,6 +6,9 @@ class ConnectionManager:
         # store active connections as {room_id: {user_id: WebSocket}}
         self.active_connections: dict[int, dict[int, WebSocket]] = {}
 
+    def get_active_connections(self):
+        return self.active_connections
+
     async def connect(self, websocket: WebSocket, room_id: int, user_id: int):
         """
         Accepts a websocket connection and registers the user in the room.
