@@ -7,6 +7,8 @@
       type="text"
       placeholder="Digite seu nome de usuário"
     />
-    <button (click)="login()">Entrar</button>
+    <button 
+    [disabled]="isButtonDisabled"
+    (click)="login()">Entrar</button>
   </div>
 </div>

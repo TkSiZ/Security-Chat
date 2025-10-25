@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserContextService } from '../../services/context/context';
 import { DataService } from '../../db.service';
+import { RsaService } from '../../services/rsa/rsa-service';
+import {generate3DESKey, encrypt3DES, decrypt3DES} from '../../utils/encryption'
 
 @Component({
   selector: 'app-login',
@@ -14,21 +16,40 @@ import { DataService } from '../../db.service';
 })
 export class LoginComponent {
   username: string = '';
+  isButtonDisabled = false;
 
-  constructor(private router: Router, private userContext: UserContextService, private api: DataService) {
+  constructor(
+    private router: Router, 
+    private userContext: UserContextService, 
+    private api: DataService,
+    private rsa: RsaService
+  ) {
 
   }
 
-  login() {
-    const trimmedUsername = this.username.trim();
-    if (trimmedUsername) {
-      console.log("AOwdoiajwdoijawoidj")
-      this.api.login(trimmedUsername).subscribe({
-        next : (userData: any) => {
-          this.userContext.updateState({id: userData.user_id, name: trimmedUsername, chats: userData.user_rooms, public_key: userData.user_public_key})
-          this.router.navigate([`/home/${trimmedUsername}`]);
-        }
-      })
+ async login() {
+  this.isButtonDisabled = true;
+  const trimmedUsername = this.username.trim();
+  if (!trimmedUsername) return;
+
+  const { publicKey, privateKey } = await this.rsa.generateRSAKeyPair();
+  const publicPem = await this.rsa.exportPublicKey(publicKey);
+  const privatePem = await this.rsa.exportPrivateKey(privateKey);
+  console.log("Terminou de gerar as keys")
+
+  // Se tiver persistencia de login tem q ver essa parada aqui
+  localStorage.setItem("private_key", privatePem);
+
+  this.api.login(trimmedUsername, publicPem).subscribe({
+    next: (userData: any) => {
+      this.userContext.updateState({
+        id: userData.user_id,
+        name: trimmedUsername,
+        chats: userData.user_rooms,
+      });
+
+      this.router.navigate([`/home/${trimmedUsername}`]);
     }
-  }
+  });
+}
 }

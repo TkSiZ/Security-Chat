@@ -6,7 +6,6 @@ export interface UserState {
   id: number | null;
   name: string;
   chats: Chat[];
-  public_key: string
   currentChat: Chat | null;
 }
 
@@ -18,7 +17,6 @@ export class UserContextService {
     id: null,
     name: '',
     chats: [],
-    public_key: '',
     currentChat: null,
   });
 
@@ -48,7 +46,6 @@ export class UserContextService {
     this._state.next({
       id: null,
       name: '',
-      public_key: '',
       chats: [],
       currentChat: null,
     });

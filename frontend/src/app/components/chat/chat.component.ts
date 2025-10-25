@@ -5,7 +5,10 @@ import { ChatService } from '../../services/chat/chat';
 import { UserContextService } from '../../services/context/context';
 import { Chat } from '../../types/chats';
 import { TextBoxComponent } from './text-box/text-box.component';
-import { Subscription } from 'rxjs';
+import { generate, Subscription } from 'rxjs';
+import { generate3DESKey } from '../../utils/encryption';
+import { send } from 'process';
+import { DataService } from '../../db.service';
 
 @Component({
   selector: 'app-chat',
@@ -19,7 +22,14 @@ export class ChatComponent implements OnChanges, OnDestroy {
 
   messages: Message[] = [];
   author: string = '';
+  tripleDES_key = ''
   currentChat: Chat | null = null;
+  author_is_server = 'server'
+  type_is_message = 'MSG'
+  type_is_join = "JOIN"
+  type_is_exit = "EXIT"
+  type_is_key = 'KEY'
+
 
   private stateSub!: Subscription;
   private isBrowser: boolean;
@@ -27,9 +37,10 @@ export class ChatComponent implements OnChanges, OnDestroy {
   constructor(
     private chatService: ChatService,
     private userContext: UserContextService,
+    private api: DataService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    this.isBrowser = isPlatformBrowser(platformId);
+    this.isBrowser = isPlatformBrowser(this.platformId);
 
     // Subscribe to user context
     this.stateSub = this.userContext.state$.subscribe((state) => {
@@ -62,9 +73,37 @@ private connectToChat(): void {
   this.chatService.connect(this.chatId, this.userId, this.userContext.state.name!)
     .then(() => {
       this.chatService.onMessage(this.chatId, (msg: Message) => {
-        console.log(msg)
-        // verificar se é mensagem de texto ou chave?
         this.messages.push(msg);
+        
+        // CHECK IF SOMEONE DISCONNECTED 
+        if (msg.author === this.author_is_server && msg.destination === null && msg.type === this.type_is_exit && msg.user_id === this.userId){
+          this.api.getUpdatedChats(this.userContext.state.name).subscribe(
+            {
+            next: (userData: any) => {
+              this.userContext.updateState({
+                chats: userData.user_rooms,
+              })
+            }
+           }
+          )
+          this.tripleDES_key = generate3DESKey()
+          
+        }
+
+        // ADMIN GENERATE THE 3DES
+        if (msg.author === this.author_is_server && msg.destination === null && msg.type === this.type_is_join && msg.user_id === this.userId){
+          this.tripleDES_key = generate3DESKey()
+        }
+
+        // ADMIN SENDS THE 3DES KEY TO SOMEONE WHO JUST JOINED
+        if(msg.author === this.author_is_server && msg.destination === null && msg.type === this.type_is_join && msg.user_id !== this.userId){
+          this.send3DESKey(this.tripleDES_key, msg.user_id)
+        }
+
+        // USER RECEIVE THE 3DES
+        if(msg.author !== this.author_is_server && msg.destination === this.userId && msg.type === this.type_is_key && msg.destination === this.userId){
+          this.tripleDES_key = msg.text
+        }
       });
     })
     .catch(err => {
@@ -88,7 +127,7 @@ private connectToChat(): void {
     // TODO: criptografar a mensagem usando a chave 3des
     if (!this.chatId || !this.userId || !text.trim()) return;
 
-    const message: Message = { text: text.trim(), author: this.author, type: "MSG", destination: null };
+    const message: Message = { text: text.trim(), user_id: this.userId ,author: this.author, type: "MSG", destination: null };
     this.chatService.sendMessage(this.chatId, message);
   }
 
@@ -104,15 +143,9 @@ private connectToChat(): void {
   }
 
   send3DESKey(key: string, user_id: number): void {
-    // TODO
-    // usar o user_id pra pegar a public key
-    // gerar a DF key usando a public key
-    // usar a DF key no Salsa20 pra criptografar o 3DES
-    // mandar criptografado
-
     if (!this.chatId || !this.userId || !key.trim()) return;
 
-    const message: Message = { text: key.trim(), author: this.author, type: "MSG", destination: null };
+    const message: Message = { text: key.trim(), user_id: this.userId ,author: this.author, type: "KEY", destination: user_id };
     this.chatService.sendMessage(this.chatId, message);
   }
 }

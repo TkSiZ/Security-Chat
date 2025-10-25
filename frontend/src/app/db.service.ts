@@ -13,12 +13,15 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
-  login(inputUserName: string): Observable<UserBackendResponse> {
+  login(inputUserName: string, publicKeyInput: any): Observable<UserBackendResponse> {
     const url = `${this.baseUrl}/login`;
 
     return this.http.post<UserBackendResponse>(url, null,
         {
-            params: {username: inputUserName}
+            params: {
+              username: inputUserName,
+              public_key: publicKeyInput
+            }
         }
     );
   }
@@ -77,4 +80,14 @@ export class DataService {
     })
   }
 
+  getUpdatedChats(user_name: string): Observable<any>{
+
+    const url = `${this.baseUrl}/updatedChat`
+
+    return this.http.get<any>(url, {
+      params:{
+        user_name: user_name
+      }
+      })
+  }
 }
