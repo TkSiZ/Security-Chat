@@ -41,7 +41,7 @@ export class LoginComponent {
   console.log("Terminou de gerar as keys")
 
   // Se tiver persistencia de login tem q ver essa parada aqui
-  localStorage.setItem("private_key", privatePem);
+  localStorage.setItem(`private_key_${trimmedUsername}`, privatePem);
 
   this.api.login(trimmedUsername, publicPem).subscribe({
     next: (userData: any) => {

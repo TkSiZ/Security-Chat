@@ -32,8 +32,5 @@ COPY . .
 # Expose the FastAPI port
 EXPOSE 8000
 
-# Healthcheck (optional but useful)
-HEALTHCHECK CMD curl --fail http://localhost:8000/health || exit 1
-
 # Run the FastAPI app with Uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

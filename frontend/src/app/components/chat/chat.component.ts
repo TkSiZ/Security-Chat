@@ -6,7 +6,7 @@ import { UserContextService } from '../../services/context/context';
 import { Chat } from '../../types/chats';
 import { TextBoxComponent } from './text-box/text-box.component';
 import { generate, Subscription, firstValueFrom } from 'rxjs'; // Import firstValueFrom
-import { generate3DESKey } from '../../utils/encryption';
+import { decrypt3DES, encrypt3DES, generate3DESKey } from '../../utils/encryption';
 import { DataService } from '../../db.service';
 import { RsaService } from '../../services/rsa/rsa-service';
 
@@ -34,6 +34,7 @@ export class ChatComponent implements OnChanges, OnDestroy {
 
   private stateSub!: Subscription;
   private isBrowser: boolean;
+  private privateKeyPromise!: Promise<CryptoKey | null>;
 
   constructor(
     private chatService: ChatService,
@@ -55,6 +56,10 @@ export class ChatComponent implements OnChanges, OnDestroy {
     });
   }
 
+  ngOnInit(){
+    this.privateKeyPromise = this.loadPrivateKey();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.isBrowser) return;
 
@@ -69,6 +74,11 @@ export class ChatComponent implements OnChanges, OnDestroy {
     }
   }
 
+  private async loadPrivateKey(): Promise<CryptoKey | null> {
+    const pem = localStorage.getItem(`private_key_${this.userContext.state.name.trim()}`);
+    if (!pem) return null;
+    return await this.rsa.importPrivateKey(pem);
+  }
   // --- Start of Fixed connectToChat ---
   private connectToChat(): void {
     if (!this.isBrowser || !this.chatId || !this.userId) return;
@@ -100,9 +110,15 @@ export class ChatComponent implements OnChanges, OnDestroy {
 
         // 3. Setup the message listener
         this.chatService.onMessage(this.chatId, async (msg: Message) => {
-          console.log(this.currentChat);
-          this.messages.push(msg);
-
+          if (msg.type === this.type_is_message){
+            console.log("Message text encrypted", msg)
+            msg.text = decrypt3DES(msg.text, this.tripleDES_key)
+            console.log("Message Decrypted", msg)
+            this.messages.push(msg);
+          }
+          else{
+            this.messages.push(msg);
+          }
           // CHECK IF SOMEONE DISCONNECTED 
           if (msg.author === this.author_is_server && msg.destination === null && msg.type === this.type_is_exit) {
             console.log("User disconnected from chat, verifying if send 3des is needed");
@@ -161,12 +177,10 @@ export class ChatComponent implements OnChanges, OnDestroy {
             console.log("RECIEVED 3DES KEY");
             console.log("3DES ENCRYPTED key:", msg.text);
             console.log("Getting the private key")
-            let private_key = localStorage.getItem('private_key');
-            console.log("Private key is:", private_key)
-            let private_key_object = await this.rsa.importPrivateKey(private_key!);
-            console.log("Private key object is:", private_key_object)
-            this.tripleDES_key = await this.rsa.decryptMessage(private_key_object, msg.text);
-            this.is_able_to_send = true
+            const private_key = await this.privateKeyPromise
+            console.log(msg.text)
+            this.tripleDES_key = await this.rsa.decryptMessage(private_key!, msg.text);
+            this.is_able_to_send = true 
             console.log("3DES KEY DECRYPTED:", this.tripleDES_key);
           }
         });
@@ -190,15 +204,18 @@ export class ChatComponent implements OnChanges, OnDestroy {
     if (!this.chatId || !this.userId || !text.trim()) return;
     let authorInMessage
     let messageType
+    let messageToSend
     if(is_log){
       authorInMessage = 'server'
       messageType = 'JOIN'
+      messageToSend = text.trim()
     }else{
       authorInMessage = this.author
       messageType = 'MSG'
+      messageToSend = encrypt3DES(text.trim(), this.tripleDES_key)
     }
-     
-    const message: Message = { text: text.trim(), user_id: this.userId, author: authorInMessage, type: messageType, destination: null };
+
+    const message: Message = { text: messageToSend, user_id: this.userId, author: authorInMessage, type: messageType, destination: null };
     this.chatService.sendMessage(this.chatId, message);
   }
 
