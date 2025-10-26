@@ -1,9 +1,14 @@
 <div class="home-container">
-  <app-sidebar></app-sidebar>
+  <!-- Mobile menu button -->
+  <button class="menu-button" (click)="toggleSidebar()">☰</button>
 
+  <!-- Sidebar -->
+  <app-sidebar [class.open]="sidebarOpen" (chatSelected)="closeSidebar()"></app-sidebar>
+
+  <!-- Chat -->
   <div class="chat-container">
     @if (userContext.state.currentChat) {
-      <app-chat [chatId]="currentChatId!" [userId] = "userId!"></app-chat>
+      <app-chat [chatId]="currentChatId!" [userId]="userId!" (click)="closeSidebar()"></app-chat>
     } @else {
       <div class="no-chat-selected">
         <p>💬 Selecione ou crie um chat para começar</p>

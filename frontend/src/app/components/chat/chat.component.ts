@@ -1,11 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, Input, SimpleChanges, OnChanges, OnDestroy, Inject, PLATFORM_ID, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Message } from '../../types/message';
+import { Chat } from '../../types/chats';
 import { ChatService } from '../../services/chat/chat';
 import { UserContextService } from '../../services/context/context';
-import { Chat } from '../../types/chats';
 import { TextBoxComponent } from './text-box/text-box.component';
-import { generate, Subscription, firstValueFrom } from 'rxjs'; // Import firstValueFrom
+import { Subscription, firstValueFrom } from 'rxjs'; // Import firstValueFrom
 import { decrypt3DES, encrypt3DES, generate3DESKey } from '../../utils/encryption';
 import { DataService } from '../../db.service';
 import { RsaService } from '../../services/rsa/rsa-service';
@@ -17,7 +17,7 @@ import { RsaService } from '../../services/rsa/rsa-service';
   imports: [TextBoxComponent],
   styleUrls: ['./chat.component.css'],
 })
-export class ChatComponent implements OnChanges, OnDestroy {
+export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
   @Input() chatId!: number;
   @Input() userId!: number;
 
@@ -32,9 +32,13 @@ export class ChatComponent implements OnChanges, OnDestroy {
   type_is_key = 'KEY';
   is_able_to_send: boolean = false
 
+
   private stateSub!: Subscription;
   private isBrowser: boolean;
   private privateKeyPromise!: Promise<CryptoKey | null>;
+  @ViewChild('messagesContainer') messagesContainer!:ElementRef<HTMLDivElement>;;
+  private shouldScroll = true
+
 
   constructor(
     private chatService: ChatService,
@@ -74,6 +78,24 @@ export class ChatComponent implements OnChanges, OnDestroy {
     }
   }
 
+  ngAfterViewChecked(): void {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+    }
+  }
+
+  private scrollToBottom() {
+  const container = this.messagesContainer?.nativeElement;
+  if (!container) return;
+  container.scrollTop = container.scrollHeight;
+  }
+
+  private isAtBottom(): boolean {
+    const container = this.messagesContainer?.nativeElement;
+    if (!container) return true;
+    return container.scrollHeight - container.scrollTop - container.clientHeight < 40;
+  }
+
   private async loadPrivateKey(): Promise<CryptoKey | null> {
     const pem = localStorage.getItem(`private_key_${this.userContext.state.name.trim()}`);
     if (!pem) return null;
@@ -110,6 +132,7 @@ export class ChatComponent implements OnChanges, OnDestroy {
 
         // 3. Setup the message listener
         this.chatService.onMessage(this.chatId, async (msg: Message) => {
+          this.shouldScroll = this.isAtBottom();
           if (msg.type === this.type_is_message){
             console.log("Message text encrypted", msg)
             msg.text = decrypt3DES(msg.text, this.tripleDES_key)
@@ -142,7 +165,9 @@ export class ChatComponent implements OnChanges, OnDestroy {
                   console.log("The now adm is:", now_adm)
 
                   if (previous_adm !== now_adm && this.userId === now_adm) {
-                    console.log("ADMIN AS CHANGED, RE-SENDING THE 3DES KEY, THE NEW ADM IS:", now_adm);
+                    console.log("ADMIN HAS CHANGED, RE-SENDING THE 3DES KEY, YOU ARE THE NEW ADM:");
+                    this.tripleDES_key = generate3DESKey()
+                    console.log("THE NEW 3DES KEY IS:", this.tripleDES_key)
                     
                     this.api.getAllUsersInChat(updatedCurrentChatOnExit.id).subscribe({
                       next: (response: any) => {

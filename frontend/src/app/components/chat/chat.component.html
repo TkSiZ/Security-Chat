@@ -1,5 +1,7 @@
 @if (currentChat === null) {
-  <p class="loading">Carregando...</p>
+  <div class="loading">
+    Carregando<span class="dots"></span>
+  </div>
 } @else {
   <div class="chat-container">
     <header class="chat-header">
@@ -11,21 +13,29 @@
 
     
     @if (messages.length) {
-      <section class="messages">
+      <section class="messages" #messagesContainer>
         @for (message of messages; track message) {
           @if (message.type !== 'KEY'){
-            <div
-            class="message"
-            [class.me]="message.author === author"  
-            [class.received]="message.author !== author"
-          >
-            <div class="author">
-              {{ message.author }}
-            </div>
+            @if (message.type === 'MSG'){
+              <div
+                class="message"
+                [class.me]="message.author === author"  
+                [class.received]="message.author !== author"
+                >
+                  <div class="author">
+                    {{ message.author }}
+                  </div>
 
-            <div class="text">{{message.text}}</div>
+                  <div class="text">{{message.text}}</div>
 
-          </div>
+              </div>
+            } @else{
+              <div class="status">
+                <div class="status.text">
+                  {{message.text}}
+                </div>
+              </div>
+            }
           }
         }
       </section>

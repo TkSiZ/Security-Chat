@@ -1,6 +1,7 @@
-import { Component, input, Input } from '@angular/core';
+import { Component, input, Input, Output } from '@angular/core';
 import { UserContextService } from '../../../services/context/context';
 import { Chat } from '../../../types/chats';
+import { EventEmitter } from 'stream';
 
 @Component({
   selector: 'app-chats',
@@ -11,8 +12,7 @@ export class ChatsComponent {
   @Input() chatName!: string;
   @Input() chatId!: number;
   @Input() admin!:number | null;
-  @Input() currentChat!: Chat | null // TO DO VERIFY IF THIS IS THE TYPE THAT WILL BE USED IN THE FINAL VERSION
-
+  @Input() currentChat!: Chat | null
 
   constructor(private userContext: UserContextService){
     this.userContext.state$.subscribe()
