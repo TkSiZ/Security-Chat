@@ -36,7 +36,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
   private stateSub!: Subscription;
   private isBrowser: boolean;
   private privateKeyPromise!: Promise<CryptoKey | null>;
-  @ViewChild('messagesContainer') messagesContainer!:ElementRef<HTMLDivElement>;;
+  @ViewChild('messagesContainer') messagesContainer!:ElementRef<HTMLDivElement>;
   private shouldScroll = true
 
 
@@ -52,7 +52,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
     // Subscribe to user context
     this.stateSub = this.userContext.state$.subscribe((state) => {
       this.author = state.name;
-      // We rely on connectToChat to update currentChat on connection, 
+      // We rely on connectToChat to update currentChat on connection,
       // but keep this to track context changes.
       if (state.currentChat?.id === this.chatId) {
          this.currentChat = state.currentChat;
@@ -119,7 +119,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
           chats: updatedChats,
           currentChat: updatedCurrentChat
         });
-        
+
         // Ensure the local currentChat property is also updated
         this.currentChat = updatedCurrentChat;
         if(this.currentChat?.admin === this.userId){
@@ -142,7 +142,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
           else{
             this.messages.push(msg);
           }
-          // CHECK IF SOMEONE DISCONNECTED 
+          // CHECK IF SOMEONE DISCONNECTED
           if (msg.author === this.author_is_server && msg.destination === null && msg.type === this.type_is_exit) {
             console.log("User disconnected from chat, verifying if send 3des is needed");
             this.is_able_to_send = false
@@ -159,16 +159,16 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
                   chats: updatedChats,
                   currentChat: updatedCurrentChatOnExit
                 });
-                
+
                 if (updatedCurrentChatOnExit) {
                   const now_adm = updatedCurrentChatOnExit.admin;
-                  console.log("The now adm is:", now_adm)
+                  console.log("The new adm is:", now_adm)
 
                   if (previous_adm !== now_adm && this.userId === now_adm) {
                     console.log("ADMIN HAS CHANGED, RE-SENDING THE 3DES KEY, YOU ARE THE NEW ADM:");
                     this.tripleDES_key = generate3DESKey()
                     console.log("THE NEW 3DES KEY IS:", this.tripleDES_key)
-                    
+
                     this.api.getAllUsersInChat(updatedCurrentChatOnExit.id).subscribe({
                       next: (response: any) => {
                         const all_users = response.users;
@@ -199,13 +199,13 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
 
           // USER RECEIVE THE 3DES
           if (msg.author !== this.author_is_server && msg.destination === this.userId && msg.type === this.type_is_key) {
-            console.log("RECIEVED 3DES KEY");
+            console.log("RECEIVED 3DES KEY");
             console.log("3DES ENCRYPTED key:", msg.text);
             console.log("Getting the private key")
             const private_key = await this.privateKeyPromise
-            console.log(msg.text)
+            console.log("My private key:\n", localStorage.getItem(`private_key_${this.userContext.state.name.trim()}`))
             this.tripleDES_key = await this.rsa.decryptMessage(private_key!, msg.text);
-            this.is_able_to_send = true 
+            this.is_able_to_send = true
             console.log("3DES KEY DECRYPTED:", this.tripleDES_key);
           }
         });
@@ -261,9 +261,9 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
 
     try {
       console.log("Getting PUBLIC KEY FROM USER:", user_id);
-      
+
       // Await the result of the Observable using firstValueFrom
-      const response: any = await firstValueFrom(this.api.getUserPublicKey(user_id)); 
+      const response: any = await firstValueFrom(this.api.getUserPublicKey(user_id));
       const destiny_public_key = response.public_key;
 
       if (!destiny_public_key) {
@@ -272,13 +272,14 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
       }
 
       console.log("Importing public key from user:", user_id);
+      console.log("Public key of user " + user_id + ":\n" + destiny_public_key)
       let public_key_object = await this.rsa.importPublicKey(destiny_public_key);
 
       console.log("Encrypting 3DES key to send to user:", user_id);
       const tripleDESEncrypted = await this.rsa.encryptMessage(public_key_object, key);
 
       const message: Message = { text: tripleDESEncrypted, user_id: this.userId, author: this.author, type: this.type_is_key, destination: user_id };
-      console.log("Sent 3DES KEY ENCRYPTED");
+      console.log("Sent 3DES KEY ENCRYPTED:\n" + tripleDESEncrypted);
       this.chatService.sendMessage(this.chatId, message);
 
     } catch (error) {

@@ -19,8 +19,8 @@ export class LoginComponent {
   isButtonDisabled = false;
 
   constructor(
-    private router: Router, 
-    private userContext: UserContextService, 
+    private router: Router,
+    private userContext: UserContextService,
     private api: DataService,
     private rsa: RsaService
   ) {
@@ -35,9 +35,9 @@ export class LoginComponent {
   const { publicKey, privateKey } = await this.rsa.generateRSAKeyPair();
 
   const publicPem = await this.rsa.exportPublicKey(publicKey);
-  console.log("PUBLIC_KEY:", publicPem)
+  console.log("PUBLIC_KEY:\n", publicPem)
   const privatePem = await this.rsa.exportPrivateKey(privateKey);
-  console.log("PRIVATE_KEY:", privatePem)
+  console.log("PRIVATE_KEY:\n", privatePem)
   console.log("Terminou de gerar as keys")
 
   // Se tiver persistencia de login tem q ver essa parada aqui
