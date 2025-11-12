@@ -123,7 +123,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
         // Ensure the local currentChat property is also updated
         this.currentChat = updatedCurrentChat;
         if(this.currentChat?.admin === this.userId){
-            console.log("Generating 3DES for user:", this.author);
+            console.log("Generating 3DES for admin:", this.author);
             this.tripleDES_key = generate3DESKey();
             this.is_able_to_send = true
             console.log("3DES key generated:", this.tripleDES_key);
@@ -144,10 +144,10 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
           }
           // CHECK IF SOMEONE DISCONNECTED
           if (msg.author === this.author_is_server && msg.destination === null && msg.type === this.type_is_exit) {
-            console.log("User disconnected from chat, verifying if send 3des is needed");
+            console.log("A User has disconnected from the chat");
             this.is_able_to_send = false
             const previous_adm = this.currentChat?.admin;
-            console.log("The Previous adm is:", previous_adm)
+
             // Must use a subscription here to fetch the data after disconnection
             this.api.getUpdatedChats(this.userContext.state.name).subscribe({
               next: (userData: any) => {
@@ -162,10 +162,20 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
 
                 if (updatedCurrentChatOnExit) {
                   const now_adm = updatedCurrentChatOnExit.admin;
-                  console.log("The new adm is:", now_adm)
 
-                  if (previous_adm !== now_adm && this.userId === now_adm) {
-                    console.log("ADMIN HAS CHANGED, RE-SENDING THE 3DES KEY, YOU ARE THE NEW ADM:");
+                  // printing logs for debug
+                  if (previous_adm !== now_adm) {
+                    console.log("ADMIN HAS CHANGED");
+                    if (this.userId === now_adm){
+                      console.log("YOU ARE NOW THE NEW ADM:");
+                    }
+                    console.log("The previous admin was:", previous_adm, ". New admin is:", now_adm);
+                  }else{
+                    console.log("ADMIN HAS NOT CHANGED");
+                  }
+                  console.log("RE-GENERATING THE 3DES KEY");
+
+                  if (this.userId == now_adm) {
                     this.tripleDES_key = generate3DESKey()
                     console.log("THE NEW 3DES KEY IS:", this.tripleDES_key)
 
@@ -177,7 +187,6 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
                             console.log("Sending the new 3DES to: ", user);
                             this.send3DESKey(this.tripleDES_key, user);
                           }
-
                         }
                       },
                       error: (err) => console.error("Failed to get users in chat:", err)
