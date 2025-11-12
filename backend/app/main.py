@@ -21,6 +21,13 @@ class Users(BaseModel):
     payload: list[str]
     room_id: int
 
+
+class LoginInfo(BaseModel):
+    username: str
+    public_key: str
+    password_hash_bytes: list[int]
+
+
 @app.get("/all_users")
 def get_all_users():
     """Returns list with the usernames and user ids of all users"""
@@ -29,11 +36,22 @@ def get_all_users():
     return {"users": users}
 
 @app.put("/update_user_in_room")
-# def update_user_in_room_rows(users: list[str] | None = Query(default=None), room_id: int):
 def update_user_in_room_rows(users: Users):
     utils.update_user_in_room_rows(users)
     return
     
+
+@app.put("/create_account")
+def create_account(login_info: LoginInfo):
+    print("Chegamos no create account")
+    return utils.create_account(login_info.username, login_info.public_key, login_info.password_hash_bytes)
+
+
+@app.post("/login")
+def login_route(username: str, public_key: str, password:str):
+    print("Chegamos no login")
+    return utils.login(username, public_key, password)
+
 
 @app.get("/user/")
 def get_user_info(username: str):
@@ -71,11 +89,6 @@ def get_public_key_by_id(user_id:int):
 @app.post("/public_keys")
 def get_public_keys(users: list[int]):
     return utils.get_public_keys(users)
-
-
-@app.post("/login")
-def login_route(username: str, public_key: str):
-    return utils.login(username, public_key)
 
 @app.get("/get_room")
 def get_room(room_id: int = Query(...)):
@@ -134,46 +147,3 @@ def is_admin_of_room(user_id: int, room_id: int):
 @app.get("/updatedChat")
 def get_updated_chat(user_name : str):
     return utils.updated_chats(user_name)
-
-# @app.get("/test/get_private_keys") # NOTE: this is for test reasons only and should not be in final version
-# def get_private_keys():
-#     if not app.private_keys:
-#         print("[DEBUG] no private keys stored")
-#         return {"msg" : "No private keys stored"}
-#     else:
-#         print(f"[DEBUG] GET PRIVATE KEYS: {app.private_keys}")
-#         return app.private_keys
-#
-# @app.get("/test/get_3des_key")
-# def get_3des_key(room_id:int):
-#     """
-#     Returns the specified room 3DES key, NOT cryptographed.
-#     Specifically, it returns a Response object, and the key is Response.body
-#     """
-#     if not app.keys_3des:
-#         print("[DEBUG] no 3des keys stored")
-#         return {"msg" : "No 3des keys stored"}
-#     else:
-#         print(f"[DEBUG] GET ALL 3DES KEYS: {app.keys_3des}")
-#         response = Response(content=app.keys_3des[room_id])  # returns only the specified room key
-#         key = response.body
-#         print(f"[DEBUG] Response key: {key}")
-#         return response
-#
-# @app.get("/test/test_3des_key")
-# def test_3des_key(room_id:int):
-#     """
-#     Tests if the key received from /test/get_3des_key is the same as the one in dictionary app.keys_3des.
-#     In other words, it tests if the key was somehow changed or corrupted when being transmitted.
-#     Of course, this is all in backend. Doesn't test keys being sent to or received from frontend
-#     """
-#     key = get_3des_key(room_id).body
-#     print(f"key type:{type(key)}")
-#     try:
-#         assert key == app.keys_3des[room_id], "[DEBUG] [Failure] Key that was received is not equal to same key in app.keys_3des"
-#         print(f"[DEBUG] [Success] Key that was received is equal to same key in app.keys_3des")
-#     except AssertionError as e:
-#         print(e)
-#         print(f"[DEBUG] [Failure] Key received: {key} (type {type(key)})")
-#         print(f"[DEBUG] [Failure] Key in app.keys_3des: {app.keys_3des[room_id]} (type {type(app.keys_3des[room_id])}")
-#     return
