@@ -1,130 +1,140 @@
-import { Injectable, input } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { UserBackendResponse } from './types/userContext';
-import { Chat, CreateChat } from './types/chats';
-import { environment } from '../environments/environment';
+import {Injectable, input} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {UserBackendResponse} from './types/userContext';
+import {Chat, CreateChat} from './types/chats';
+import {environment} from '../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class DataService {
-  private baseUrl = environment.apiUrl;
+    private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient) {
+    }
 
-  login(inputUserName: string, publicKeyInput: any): Observable<UserBackendResponse> {
-    const url = `${this.baseUrl}/login`;
+    login(inputUserName: string, publicKeyInput: any, password: string): Observable<UserBackendResponse> {
+        const url = `${this.baseUrl}/login`;
 
-    return this.http.post<UserBackendResponse>(url, null,
-        {
-            params: {
-              username: inputUserName,
-              public_key: publicKeyInput
+        return this.http.post<UserBackendResponse>(url, null,
+            {
+                params: {
+                    username: inputUserName,
+                    public_key: publicKeyInput,
+                    password: password
+                }
             }
-        }
-    );
-  }
+        );
+    }
 
-  createChat(chat: CreateChat): Observable<any> {
-    const url = `${this.baseUrl}/create_room`;
+    create_account(inputUserName: string, publicKeyInput: any, password_hash_bytes: number[]): Observable<UserBackendResponse> {
+        const url = `${this.baseUrl}/create_account`;
+        const payload = {username: inputUserName, public_key: publicKeyInput, password_hash_bytes: password_hash_bytes}
+        console.log("Payload:", payload)
 
-    return this.http.post<Chat>(url, null, {
-      params: {
-        room_id: chat.room_id,
-        room_name: chat.room_name,
-        user_id: chat.user_id
-      }
-    });
-  }
+        return this.http.put<UserBackendResponse>(url, payload);
+    }
 
-  updateUserChat(userIdInput: number, room_id: number): Observable<any> {
-    const url = `${this.baseUrl}/join_room/${room_id}`;
+    createChat(chat: CreateChat): Observable<any> {
+        const url = `${this.baseUrl}/create_room`;
 
-    return this.http.put<any>(url, null, {
-      params: {
-        user_id: userIdInput
-      }
-    });
-  }
+        return this.http.post<Chat>(url, null, {
+            params: {
+                room_id: chat.room_id,
+                room_name: chat.room_name,
+                user_id: chat.user_id
+            }
+        });
+    }
 
-  updateUserInRoom(users: any, room_id: number) : Observable<any>{
-    const url = `${this.baseUrl}/update_user_in_room`
-    const payload = {payload:users, room_id:room_id}
+    updateUserChat(userIdInput: number, room_id: number): Observable<any> {
+        const url = `${this.baseUrl}/join_room/${room_id}`;
 
-    console.log("Print antes do return:", payload)
+        return this.http.put<any>(url, null, {
+            params: {
+                user_id: userIdInput
+            }
+        });
+    }
 
-    return this.http.put<any>(url, payload)
-  }
+    updateUserInRoom(users: any, room_id: number): Observable<any> {
+        const url = `${this.baseUrl}/update_user_in_room`
+        const payload = {payload: users, room_id: room_id}
 
-  findChat(id: number) : Observable<any>{
-    const url = `${this.baseUrl}/get_room`
+        // console.log("Print antes do return:", payload)
 
-    return this.http.get<any>(url, {
-      params: {
-        room_id: id
-      }
-    })
-  }
+        return this.http.put<any>(url, payload)
+    }
 
-  deleteChat(id: number) : Observable<any>{
-    // NOTA: isso não foi testado
-    const url = `${this.baseUrl}/test/delete_room`
+    findChat(id: number): Observable<any> {
+        const url = `${this.baseUrl}/get_room`
 
-    return this.http.delete<any>(url, {
-      params: {
-        room_id: id
-      }
-    })
-  }
+        return this.http.get<any>(url, {
+            params: {
+                room_id: id
+            }
+        })
+    }
 
-  getUserPublicKey(user_id: number) : Observable<any>{
-    // NOTA: isso não foi testado
-    const url = `${this.baseUrl}/public_key_by_id`
+    deleteChat(id: number): Observable<any> {
+        // NOTA: isso não foi testado
+        const url = `${this.baseUrl}/test/delete_room`
 
-    return this.http.get<any>(url, {
-      params: {
-        user_id: user_id
-      }
-    })
-  }
+        return this.http.delete<any>(url, {
+            params: {
+                room_id: id
+            }
+        })
+    }
 
-  getUpdatedChats(user_name: string): Observable<any>{
+    getUserPublicKey(user_id: number): Observable<any> {
+        // NOTA: isso não foi testado
+        const url = `${this.baseUrl}/public_key_by_id`
 
-    const url = `${this.baseUrl}/updatedChat`
+        return this.http.get<any>(url, {
+            params: {
+                user_id: user_id
+            }
+        })
+    }
 
-    return this.http.get<any>(url, {
-      params:{
-        user_name: user_name
-      }
-      })
-  }
+    getUpdatedChats(user_name: string): Observable<any> {
 
-  getAllUsersInChat(chat_id: number): Observable<any>{
-    const url = `${this.baseUrl}/users_in_room`
+        const url = `${this.baseUrl}/updatedChat`
 
-    return this.http.get<any>(url,{
-      params: {
-       room_id : chat_id
-      }
-    })
-  }
+        return this.http.get<any>(url, {
+            params: {
+                user_name: user_name
+            }
+        })
+    }
 
-  getAllUsers(): Observable<any>{
-    const url = `${this.baseUrl}/all_users`
+    getAllUsersInChat(chat_id: number): Observable<any> {
+        const url = `${this.baseUrl}/users_in_room`
 
-    return this.http.get<any>(url, {
-      params: {}
-    })
-  }
+        return this.http.get<any>(url, {
+            params: {
+                room_id: chat_id
+            }
+        })
+    }
 
-  getPublicKeyByUserId(userIdInput: number): Observable<any>{
-    const url = `${this.baseUrl}/public_key_by_id`
+    getAllUsers(): Observable<any> {
+        const url = `${this.baseUrl}/all_users`
 
-    return this.http.get<any>(url, {
-      params:{
-        user_id: userIdInput
-      }
-    })
-  }
+        return this.http.get<any>(url, {
+            params: {}
+        })
+    }
+
+    getPublicKeyByUserId(userIdInput: number): Observable<any> {
+        const url = `${this.baseUrl}/public_key_by_id`
+
+        return this.http.get<any>(url, {
+            params: {
+                user_id: userIdInput
+            }
+        })
+    }
 }

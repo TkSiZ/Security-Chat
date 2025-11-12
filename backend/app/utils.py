@@ -1,17 +1,23 @@
 import json
 import os
+import bcrypt
 import psycopg2
 # from app.encryption_utils import *
 from .encryption_utils import * # this is what works for Vini
 from dotenv import load_dotenv
 from fastapi import WebSocket
-try:
-    from app.main import Users
-except ImportError:
-    from pydantic import BaseModel
-    class Users(BaseModel):
-        payload: list[str]
-        room_id: int
+from pydantic import BaseModel
+
+
+class Users(BaseModel):
+    payload: list[str]
+    room_id: int
+
+
+class LoginInfo(BaseModel):
+    username: str
+    public_key: str
+    password_hash_bytes: list[int]
 
 # connection for online postgres database
 load_dotenv()
@@ -285,6 +291,7 @@ def create_room(
         "room_name": room_name,
         "room_admin": user[1]
     }
+
 def get_user_info(username:str):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
@@ -297,7 +304,10 @@ def get_user_info(username:str):
 
     user = cur.fetchone()
     if not user:
-        return {"msg" : f"User '{username}' does not exist"}
+        return {
+            "msg" : f"User '{username}' does not exist",
+            "user_id": -1,
+        }
 
     user_id = user[0]
 
@@ -384,8 +394,8 @@ def join_room(user_id:int, room_id:int):
     conn.close()
     return {"msg" : f"User {user_id} inserted into room {room_id}"}
 
-def login(username:str, public_key:str):
-    """Creates/updates user info in database. Requires public_key generated in client frontend"""
+def create_account(username:str, public_key:str, password_hash:list[int]):
+    """Creates user in database. Requires public_key generated in client frontend"""
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
     cur = conn.cursor()
@@ -398,18 +408,78 @@ def login(username:str, public_key:str):
     user = cur.fetchone()
 
     if not user: # user didn't exist, must be created
-        cur.execute(
-            """INSERT INTO "User" (username, public_key) VALUES (%s, %s);""",
-            (username, public_key)
-        )
-        msg =  f"User '{username}' was created and has logged in"
+        password_hash_bytes = bytes(password_hash)
 
-    else: # user exists, must be updated
         cur.execute(
-            """UPDATE "User" SET public_key = (%s) WHERE username = (%s);""",
-            (public_key, username)
+            """INSERT INTO "User" (username, public_key, password_hash) VALUES (%s, %s, %s);""",
+            (username, public_key, password_hash_bytes)
         )
-        msg = f"User '{username}' has logged in"
+        msg =  f"User '{username}' was created"
+    else:
+        return {
+            "msg": f"User '{username}' already exists",
+            "user_id": -1,
+            "user_rooms": None,
+            "user_admins": None,
+        }
+
+    conn.commit()
+
+    user_info = get_user_info(username)
+
+    cur.close()
+    conn.close()
+
+    return {
+        "msg": msg,
+        "user_id": user_info["user_id"],
+        "user_rooms": user_info["user_rooms"],
+        "user_admins": user_info["user_admins"],
+    }
+
+def login(username:str, public_key:str, password:str):
+    """Logs user in. Requires public_key generated in client frontend"""
+    conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT * FROM "User" WHERE username = %s;""",
+        (username,)
+    )
+
+    user = cur.fetchone()
+
+    if not user: # user didn't exist
+        return {
+            "msg": f"User '{username}' doesn't exist",
+            "user_id": -1,
+            "user_rooms": None,
+            "user_admins": None,
+        }
+
+    else: # user exists, must be validated and updated
+        # validate
+        user_db_password_hash = bytes(user[3])
+
+        if bcrypt.checkpw(password.encode('utf-8'), user_db_password_hash):
+            # update
+            cur.execute(
+                """UPDATE "User"
+                   SET public_key = (%s)
+                   WHERE username = (%s);""",
+                (public_key, username)
+            )
+            msg = f"User '{username}' has logged in"
+        else: # password doesn't match
+            cur.close()
+            conn.close()
+            return {
+                "msg": f"Incorrect Password for user '{username}'",
+                "user_id": -2,
+                "user_rooms": None,
+                "user_admins": None,
+            }
 
     conn.commit()
 
