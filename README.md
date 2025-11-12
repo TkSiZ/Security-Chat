@@ -18,9 +18,11 @@ This guide explains how to start the Postgres database using Docker and test the
 1. If the postgres isn't downloaded access [this link](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) and download version 17.6  
 1.1. After download postgres add the psql to the PATH in environment variables
 2. Test in terminal
-```bash
-  psql -h localhost -p 5432 -U app_user -d app_db
-````
+
+`docker exec -it docker_db_project /bin/bash`
+
+`psql -h localhost -p 5432 -U app_user -d app_db`
+
 It will ask for a password, it is: 1234. Then you should see this:
 ```bash
   app_db=>

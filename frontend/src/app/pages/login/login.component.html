@@ -2,11 +2,20 @@
   <h1>Bem-vindo ao Secure Chat</h1>
 
   <div class="login-box">
-    <input
-      [(ngModel)]="username"
-      type="text"
-      placeholder="Digite seu nome de usuário"
-    />
-    <button (click)="login()">Entrar</button>
+    @if(!isButtonDisabled){
+      <input
+        [(ngModel)]="username"
+        type="text"
+        placeholder="Digite seu nome de usuário"
+      />
+      <button 
+      [disabled]="isButtonDisabled"
+      (click)="login()">Entrar</button>
+    }@else{
+        <div class="loading">
+          Carregando<span class="dots"></span>
+        </div>
+    }
+    
   </div>
 </div>

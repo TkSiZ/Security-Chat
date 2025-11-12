@@ -11,5 +11,24 @@ import { UserContextService } from '../../services/context/context';
   imports: [SidebarComponent, ChatComponent]
 })
 export class HomeComponent {
-  constructor(public userContext: UserContextService) {}
+  userId : number | null = null
+  currentChatId : number | null = null
+  sidebarOpen = false
+  constructor(public userContext: UserContextService) {
+    this.userContext.state$.subscribe(state => {
+      this.userId = state.id
+      this.currentChatId = state.currentChat?.id!
+    })
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  // Fechar sidebar quando clicar no chat (mobile)
+  closeSidebar() {
+    if (window.innerWidth < 768) { 
+      this.sidebarOpen = false;
+    }
+  }
 }

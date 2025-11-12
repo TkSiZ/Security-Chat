@@ -7,7 +7,7 @@
     <!-- Botões abaixo do título -->
     <div class="sidebar-actions">
       <button (click)="showCreatePopup = true" class="action-button">🆕 Criar Chat</button>
-      <button (click)="showConnectPopup = true" class="action-button">🔗 Conectar Chat</button>
+<!--      <button (click)="showConnectPopup = true" class="action-button">🔗 Conectar Chat</button>-->
     </div>
   </div>
 
@@ -17,7 +17,8 @@
       <app-chats
         [chatName]="chat.name"
         [chatId]="chat.id"
-        [currentChat]="currentChat">
+        [currentChat]="currentChat"
+        [admin]="chat.admin">
       </app-chats>
     }
   </div>
@@ -29,15 +30,32 @@
 
   <!-- Popup Criar Chat -->
   <div class="popup" *ngIf="showCreatePopup">
-    <div class="popup-content">
-      <h3>Criar novo chat</h3>
-      <input #chatNameInput placeholder="Nome do chat" />
-      <div class="popup-actions">
-        <button (click)="createChat(chatNameInput)" class="action-button">Criar</button>
-        <button (click)="showCreatePopup = false" class="action-button">Cancelar</button>
+  <div class="popup-content">
+    <h3>Criar novo chat</h3>
+    <input #chatCodeInput type="number" min="1" placeholder="Código do chat" />
+    <input #chatNameInput placeholder="Nome do chat" />
+
+    <!-- Lista de usuários -->
+    <div class="user-list-container">
+      <h4>Selecionar usuários</h4>
+      <div class="user-list">
+        <div class="user-item">
+          @for (user of users; track user) {
+            <input type="checkbox" id=user name="{{user.username}}" value="{{user.user_id}}" />
+            <label for="{{user}}"> {{user.username}} </label>
+            <br>
+          }
+        </div>
       </div>
     </div>
+
+    <div class="popup-actions">
+      <button (click)="createChat(chatNameInput, chatCodeInput)" class="action-button">Criar</button>
+      <button (click)="showCreatePopup = false" class="action-button">Cancelar</button>
+    </div>
   </div>
+</div>
+
 
   <!-- Popup Conectar Chat -->
   <div class="popup" *ngIf="showConnectPopup">

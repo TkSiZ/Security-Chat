@@ -31,7 +31,8 @@
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {
             "production": {
@@ -88,7 +89,8 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "webWorkerTsConfig": "tsconfig.worker.json"
           }
         }
       }

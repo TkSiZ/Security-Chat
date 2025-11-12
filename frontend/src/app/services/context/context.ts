@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Chat } from '../../types/chats';
 
 export interface UserState {
+  id: number | null;
   name: string;
   chats: Chat[];
   currentChat: Chat | null;
@@ -13,20 +14,17 @@ export interface UserState {
 })
 export class UserContextService {
   private readonly _state = new BehaviorSubject<UserState>({
+    id: null,
     name: '',
     chats: [],
     currentChat: null,
   });
 
-  // estado observável
   state$ = this._state.asObservable();
 
-  // retorna o estado atual (getter)
   get state(): UserState {
     return this._state.value;
   }
-
-  // atualiza parte do estado (merge)
   updateState(newState: Partial<UserState>) {
     const current = this._state.value;
     this._state.next({
@@ -35,48 +33,24 @@ export class UserContextService {
     });
   }
 
-  // ✅ Adiciona um novo chat
-  addChat(name: string) {
+  addChat(idInput: number, nameInput: string, adminInput: number) {
     const state = this._state.value;
-    const nextId =
-      state.chats.length > 0
-        ? Math.max(...state.chats.map((c) => c.id)) + 1
-        : 1;
-
-    const newChat: Chat = { id: nextId, name };
+    const newChat: Chat = { id: idInput, name:nameInput, admin: adminInput };
     this._state.next({
       ...state,
       chats: [...state.chats, newChat],
     });
   }
 
-  // ✅ Conecta a um chat existente (por nome ou id)
-  connectChat(identifier: string | number) {
-    const state = this._state.value;
-    let found: Chat | undefined;
-
-    if (typeof identifier === 'number' || /^\d+$/.test(String(identifier))) {
-      const idNum = Number(identifier);
-      found = state.chats.find((c) => c.id === idNum);
-    } else {
-      found = state.chats.find((c) => c.name === identifier);
-    }
-
-    // Atualiza apenas se encontrar
-    if (found) {
-      this._state.next({
-        ...state,
-        currentChat: found,
-      });
-    }
-  }
-
-  // 🔥 Reseta o contexto completamente (logout)
   delState() {
     this._state.next({
+      id: null,
       name: '',
       chats: [],
       currentChat: null,
     });
   }
+
 }
+
+

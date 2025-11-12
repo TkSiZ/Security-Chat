@@ -1,9 +1,11 @@
 @if (currentChat === null) {
-  <h3>Selecione um chat</h3>
+  <div class="loading">
+    Carregando<span class="dots"></span>
+  </div>
 } @else {
   <div class="chat-container">
     <header class="chat-header">
-      <h3 class="chat-name">{{ currentChat.name || 'Selecione um chat' }}</h3>
+      <h3 class="chat-name">{{ currentChat.name}}</h3>
       <button class="copy-btn" (click)="copyChatId()" title="Copiar ID">📋</button>
     </header>
 
@@ -11,20 +13,30 @@
 
     
     @if (messages.length) {
-      <section class="messages">
+      <section class="messages" #messagesContainer>
         @for (message of messages; track message) {
-          <!-- TO DO: CHANGE THIS TO VERIFY THE NAME IN THE CONTEXT -->
-          <div
-            class="message"
-            [class.me]="message.author === 'me'"  
-            [class.received]="message.author !== 'me'"
-          >
-            <div class="author">
-              <!-- TO DO: CHANGE THIS TO VERIFY THE NAME IN THE CONTEXT -->
-              {{ message.author === 'me' ? 'You' : message.author }}
-            </div>
-            <div class="text">{{ message.text }}</div>
-          </div>
+          @if (message.type !== 'KEY'){
+            @if (message.type === 'MSG'){
+              <div
+                class="message"
+                [class.me]="message.author === author"  
+                [class.received]="message.author !== author"
+                >
+                  <div class="author">
+                    {{ message.author }}
+                  </div>
+
+                  <div class="text">{{message.text}}</div>
+
+              </div>
+            } @else{
+              <div class="status">
+                <div class="status.text">
+                  {{message.text}}
+                </div>
+              </div>
+            }
+          }
         }
       </section>
     } @else {
@@ -32,7 +44,8 @@
         <p>Sem mensagens</p>
       </section>
     }
-    
-    <app-text-box (sendMessageChild)="sendMessage($event)"></app-text-box>
+    @if (is_able_to_send){
+      <app-text-box (sendMessageChild)="sendMessage($event, false)"></app-text-box>
+    }
   </div>
 }

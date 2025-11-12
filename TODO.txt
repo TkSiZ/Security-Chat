@@ -1,0 +1,9 @@
+ESSENCIAL:
+1. Autenticidade
+2. Disponibilidade
+3. Confidencialidade
+4. Recarregar chats da sidebar de tempos em tempos. Até onde eu sei, ele ta funcionando no localhost, mas não sei se isso vai proceder no deploy
+
+OPCIONAL
+1. Tem que aparecer um erro quando tentamos criar uma sala ja existente (back + front)
+2. Adicionar usuários depois de criada a sala (da pra dale mas não é prioridade)

@@ -1,6 +1,12 @@
 interface Chat{
     id : number,
-    name: string
+    name: string,
+    admin: number
 }
 
-export type {Chat}
+interface CreateChat{
+    room_id: number,
+    room_name: string,
+    user_id: number,
+}
+export type {Chat, CreateChat}

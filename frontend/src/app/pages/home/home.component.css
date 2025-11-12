@@ -3,36 +3,89 @@
   height: 100vh;
   width: 100%;
   overflow: hidden;
-  background-color: #151517;
+  position: relative;
 }
 
+/* Mobile menu button */
+.menu-button {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1100;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+app-chat{
+  width: 100%;
+}
+
+/* Sidebar default (hidden on mobile) */
 app-sidebar {
-  width: 300px;
-  border-right: 1px solid #151517;
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 250px;
+  height: 100%;
+  z-index: 1000;
+  transition: left 0.3s ease;
 }
 
-app-chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* Sidebar open */
+app-sidebar.open {
+  left: 0;
 }
 
+/* Chat container takes full remaining space */
 .chat-container {
   flex: 1;
   display: flex;
   justify-content: center;
   background-color: #1e1e2f;
   color: #aaa;
+  width: 100%;
 }
 
+/* No chat selected */
 .no-chat-selected {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: grid;
   place-items: center;
-  height: 100vh;
+  height: 100%;
   text-align: center;
   font-size: 2.2rem;
   font-weight: 500;
   opacity: 0.8;
   margin: 0;
+  padding: 1rem;
+}
+
+/* Desktop / tablet */
+@media (min-width: 768px) {
+  .home-container {
+    flex-direction: row;
+  }
+
+  .menu-button {
+    display: none;
+  }
+
+  app-sidebar {
+    position: relative;
+    left: 0;
+    width: 250px;
+    border-right: 1px solid #151517;
+  }
+
+  .chat-container {
+    width: calc(100% - 250px);
+  }
+
+  .no-chat-selected {
+    font-size: 2rem;
+  }
 }

@@ -1,0 +1,31 @@
+# Node modules (install inside Docker)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Angular build outputs (will be generated in Docker)
+dist
+out-tsc
+
+# IDE/editor files
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Environment files (if you don't want to copy local secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# Git
+.git
+.gitignore
