@@ -1,9 +1,17 @@
+import json
 import os
 import psycopg2
 # from app.encryption_utils import *
 from .encryption_utils import * # this is what works for Vini
 from dotenv import load_dotenv
 from fastapi import WebSocket
+try:
+    from app.main import Users
+except ImportError:
+    from pydantic import BaseModel
+    class Users(BaseModel):
+        payload: list[str]
+        room_id: int
 
 # connection for online postgres database
 load_dotenv()
@@ -12,6 +20,47 @@ DB_USER = os.getenv('DB_USER')
 DB_NAME = os.getenv('DB_NAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PORT = os.getenv('DB_PORT')
+
+
+def update_user_in_room_rows(users: Users):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+    cur = conn.cursor()
+
+    room_id = users.room_id
+
+    for user in users.payload:
+        json_user = json.loads(user)
+        cur.execute(
+            """INSERT INTO "User_In_Room" (room_id, user_id)
+            VALUES (%s, %s) ON CONFLICT DO NOTHING""",
+            (room_id, json_user["user_id"])
+        )
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+
+def get_all_users():
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+    cur = conn.cursor()
+
+    cur.execute("""SELECT username, user_id FROM "User" """)
+
+    users = cur.fetchall()
+    usernames = []
+
+    cur.close()
+    conn.close()
+
+    # print(f"[DEBUG] All users:")
+    for user in users:
+        # print(user[0], user[1])
+        usernames.append({"username": user[0], "user_id": user[1]})
+
+    return usernames
+
 
 def new_admin(user_id:int, room_id:int):
     """When a user connects to the websocket, this function is called to add them as an admin when the room is empty"""

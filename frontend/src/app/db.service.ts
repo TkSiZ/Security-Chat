@@ -48,6 +48,15 @@ export class DataService {
     });
   }
 
+  updateUserInRoom(users: any, room_id: number) : Observable<any>{
+    const url = `${this.baseUrl}/update_user_in_room`
+    const payload = {payload:users, room_id:room_id}
+
+    console.log("Print antes do return:", payload)
+
+    return this.http.put<any>(url, payload)
+  }
+
   findChat(id: number) : Observable<any>{
     const url = `${this.baseUrl}/get_room`
 
@@ -96,8 +105,16 @@ export class DataService {
 
     return this.http.get<any>(url,{
       params: {
-       room_id : chat_id 
+       room_id : chat_id
       }
+    })
+  }
+
+  getAllUsers(): Observable<any>{
+    const url = `${this.baseUrl}/all_users`
+
+    return this.http.get<any>(url, {
+      params: {}
     })
   }
 

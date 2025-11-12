@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from app.ConnectionManager import ConnectionManager
 import app.utils as utils
 import json
@@ -16,14 +17,22 @@ app.add_middleware(
 
 manager = ConnectionManager()
 
-@app.get("/users_in_room/")
-def get_users_in_room(room_id:int):
-    """Returns users connected to the room websocket, NOT the users through User_In_Room table"""
-    ac = manager.get_active_connections()
-    if room_id not in ac or not ac[room_id]:
-        return {"msg": f"Room {room_id} has no users or doesn't exist"}
-    else:
-        return list(ac[room_id].keys())
+class Users(BaseModel):
+    payload: list[str]
+    room_id: int
+
+@app.get("/all_users")
+def get_all_users():
+    """Returns list with the usernames and user ids of all users"""
+    users = utils.get_all_users()
+
+    return {"users": users}
+
+@app.put("/update_user_in_room")
+# def update_user_in_room_rows(users: list[str] | None = Query(default=None), room_id: int):
+def update_user_in_room_rows(users: Users):
+    utils.update_user_in_room_rows(users)
+    return
     
 
 @app.get("/user/")
@@ -100,15 +109,6 @@ async def websocket_endpoint(
     Optional `room_name` query param to create room on first connect.
     """
     await manager.connect(websocket, room_id, user_id)
-
-    # payload = {
-    #         "author" : "server",
-    #         "user_id": user_id,
-    #         "text" : f"{user_name} has joined the chat.",
-    #         "type" : "JOIN", # "KEY" "MSG" "JOIN" "EXIT", 
-    #         "destination": None
-    #     }
-    # await manager.broadcast(payload, room_id, user_id)
 
     try:
         while True:

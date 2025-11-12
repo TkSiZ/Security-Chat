@@ -4,7 +4,9 @@ import { Router } from '@angular/router';
 import { ChatsComponent } from './chats/chats.component';
 import { UserContextService } from '../../services/context/context';
 import { Chat, CreateChat } from '../../types/chats';
+import { User } from '../../types/user';
 import { DataService } from '../../db.service';
+import {firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
@@ -18,8 +20,9 @@ export class SidebarComponent {
   currentChat: Chat | null = null;
   showCreatePopup = false;
   showConnectPopup = false;
-  userId: number| null= null 
-  room_id : number| null  = null
+  userId: number| null = null;
+  room_id : number| null = null;
+  users: User[] = [];
 
   constructor(
     private userContext: UserContextService,
@@ -31,17 +34,31 @@ export class SidebarComponent {
       this.currentChat = state.currentChat;
       this.userId = state.id
     });
+    this.api.getAllUsers().subscribe({
+      next: (response: any) => {
+        this.users = response.users;
+        console.log("Users:", this.users);
+        },
+      error: (err) => console.error("Failed to get all users in sidebar.component.ts", err)
+    });
   }
 
-  createChat(chatNameInput: HTMLInputElement, chatCodeInput: HTMLInputElement ) {
+  async createChat(chatNameInput: HTMLInputElement, chatCodeInput: HTMLInputElement ) {
     const roomNameInput = chatNameInput.value.trim();
     const chatCode = Number(chatCodeInput.value.trim())
+
+    const selectedUsers = Array.from(
+      document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked')).map(el => JSON.stringify({
+      username: el.name,
+      user_id: Number(el.value)
+    }));
 
     if (isNaN(chatCode) || !roomNameInput ) {
       alert("Chat code inválido ou Nome do chat Vazio")
     } else {
       console.log("Chat code is:", chatCode);
-       const payload : CreateChat = {
+      // create Chat
+      const payload : CreateChat = {
         user_id: this.userId!,
         room_id: chatCode,
         room_name: roomNameInput
@@ -49,15 +66,20 @@ export class SidebarComponent {
 
       console.log(payload)
       console.log(roomNameInput)
-      this.api.createChat(payload).subscribe({
-        next: (roomData: any) => {
-        this.userContext.addChat(roomData.room_id, roomData.room_name, this.userId!)
-        }
-      })
+
+      const roomData = await firstValueFrom(this.api.createChat(payload))
+      this.userContext.addChat(roomData.room_id, roomData.room_name, this.userId!)
+
       chatNameInput.value = ''
       chatCodeInput.value = ''
       this.showCreatePopup = false;
-      }
+
+      // add users in room
+      console.log("Adding selected users to chat", chatCode);
+      console.log(selectedUsers);
+
+      const _ = await firstValueFrom(this.api.updateUserInRoom(selectedUsers, chatCode))
+    }
   }
 
   connectChat(chatConnectInput: HTMLInputElement) {
@@ -66,7 +88,7 @@ export class SidebarComponent {
     if (!id){
       alert("Insira um identificador")
       return
-    } 
+    }
     this.api.findChat(id).subscribe({
       next: (roomData: any) => {
         if(roomData.room_name === "Error: no room"){
@@ -74,7 +96,7 @@ export class SidebarComponent {
           return
         }
         this.userContext.addChat(id, roomData.room_name, roomData.room_admin)
-      
+
         chatConnectInput.value = '';
         this.showConnectPopup = false;
       }
