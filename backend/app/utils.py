@@ -2,12 +2,60 @@ import json
 import os
 import bcrypt
 import psycopg2
+import random
+import smtplib
+from email.mime.text import MIMEText
 # from app.encryption_utils import *
-from .encryption_utils import * # this is what works for Vini
+# from .encryption_utils import * # this is what works for Vini
 from dotenv import load_dotenv
 from fastapi import WebSocket
 from pydantic import BaseModel
+import time
 
+def saveOtp(user_id: int, code: str, app):
+    app.state.otp_storage[user_id] = {
+        "code": code,
+        "expires": time.time() + 300
+    }
+
+def otpVerification(user_id: int, otpCode: str, app) -> bool:
+    otp_storage = app.state.otp_storage
+    print(otp_storage)
+    if user_id not in otp_storage:
+        print("Erro no id")
+        return False
+
+    stored = otp_storage[user_id]
+
+    # Verifica expiração
+    if time.time() > stored["expires"]:
+        print("Erro no Tempo")
+        del otp_storage[user_id]
+        return False
+
+    # Verifica código
+    if stored["code"] != otpCode:
+        print("Erro no código")
+        return False
+
+    # Tudo OK ✔️
+    print("deu tudo certo papai")
+    del otp_storage[user_id]
+    return True
+
+def send_email_code(recipient, user_id, app):
+    code = generate_otp()
+    msg = MIMEText(f"Seu código de verificação é: {code}")
+    msg["Subject"] = "Seu código 2FA"
+    msg["From"] = "siithard2005@gmail.com"
+    msg["To"] = recipient
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login("siithard2005@gmail.com", "pryi lrix yhxr gtlg")
+        server.send_message(msg)
+        print("Código Enviado")
+        saveOtp(user_id, code, app)
 
 class Users(BaseModel):
     payload: list[str]
@@ -26,6 +74,11 @@ DB_USER = os.getenv('DB_USER')
 DB_NAME = os.getenv('DB_NAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PORT = os.getenv('DB_PORT')
+
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
 
 
 def update_user_in_room_rows(users: Users):
@@ -292,6 +345,28 @@ def create_room(
         "room_admin": user[1]
     }
 
+def get_user_email(username: str):
+    conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT email FROM "User" WHERE username = %s;""",
+        (username,)
+    )
+
+    user = cur.fetchone()
+    if not user:
+        return {
+            "msg" : f"User '{username}' does not exist",
+            "user_id": -1,
+        }
+
+    user_email = user[0]
+
+    return  user_email
+
+
 def get_user_info(username:str):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
@@ -394,7 +469,7 @@ def join_room(user_id:int, room_id:int):
     conn.close()
     return {"msg" : f"User {user_id} inserted into room {room_id}"}
 
-def create_account(username:str, public_key:str, password_hash:list[int]):
+def create_account(username:str, public_key:str, password_hash:list[int], email:str):
     """Creates user in database. Requires public_key generated in client frontend"""
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
@@ -411,8 +486,8 @@ def create_account(username:str, public_key:str, password_hash:list[int]):
         password_hash_bytes = bytes(password_hash)
 
         cur.execute(
-            """INSERT INTO "User" (username, public_key, password_hash) VALUES (%s, %s, %s);""",
-            (username, public_key, password_hash_bytes)
+            """INSERT INTO "User" (username, public_key, password_hash, email) VALUES (%s, %s, %s, %s);""",
+            (username, public_key, password_hash_bytes, email)
         )
         msg =  f"User '{username}' was created"
     else:
@@ -437,7 +512,7 @@ def create_account(username:str, public_key:str, password_hash:list[int]):
         "user_admins": user_info["user_admins"],
     }
 
-def login(username:str, public_key:str, password:str):
+def login(username:str, public_key:str, password:str, app):
     """Logs user in. Requires public_key generated in client frontend"""
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
 
@@ -484,6 +559,9 @@ def login(username:str, public_key:str, password:str):
     conn.commit()
 
     user_info = get_user_info(username)
+    user_email = get_user_email(username)
+    send_email_code(user_email, user_info['user_id'], app)
+
 
     cur.close()
     conn.close()

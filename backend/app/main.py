@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query, Response
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.ConnectionManager import ConnectionManager
@@ -8,6 +8,7 @@ from .encryption_utils import *
 
 app = FastAPI(title="Zap")
 
+app.state.otp_storage = {}
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,6 +27,7 @@ class LoginInfo(BaseModel):
     username: str
     public_key: str
     password_hash_bytes: list[int]
+    email: str
 
 
 @app.get("/all_users")
@@ -44,13 +46,13 @@ def update_user_in_room_rows(users: Users):
 @app.put("/create_account")
 def create_account(login_info: LoginInfo):
     print("Chegamos no create account")
-    return utils.create_account(login_info.username, login_info.public_key, login_info.password_hash_bytes)
+    return utils.create_account(login_info.username, login_info.public_key, login_info.password_hash_bytes, login_info.email)
 
 
 @app.post("/login")
 def login_route(username: str, public_key: str, password:str):
     print("Chegamos no login")
-    return utils.login(username, public_key, password)
+    return utils.login(username, public_key, password, app)
 
 
 @app.get("/user/")
@@ -147,3 +149,17 @@ def is_admin_of_room(user_id: int, room_id: int):
 @app.get("/updatedChat")
 def get_updated_chat(user_name : str):
     return utils.updated_chats(user_name)
+
+@app.get("/auth")
+def otpVerification(user_id: int, otpCode: str, request: Request):
+    print(user_id)
+    print(type(user_id))
+    is_valid = utils.otpVerification(user_id, otpCode, request.app)
+
+    if not is_valid:
+        raise HTTPException(status_code=401, detail="Invalid or expired OTP")
+
+    return {
+        "status": "success",
+        "message": "OTP verified successfully"
+    }
