@@ -1,0 +1,142 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #1e1e2f;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 1rem; /* Evita que toque nas bordas do celular */
+    box-sizing: border-box;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* ANIMAÇÃO DOS PONTOS */
+.dots::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0% {
+        content: '';
+    }
+    25% {
+        content: '.';
+    }
+    50% {
+        content: '..';
+    }
+    75% {
+        content: '...';
+    }
+    100% {
+        content: '';
+    }
+}
+
+.login-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #2a2a3d;
+    padding: 2rem;
+    border-radius: 0.625rem;
+    box-shadow: 0 0 0.625rem rgba(97, 218, 251, 0.4);
+    width: 90%; /* Responsivo no mobile */
+    max-width: 360px; /* Limite em telas maiores */
+    box-sizing: border-box;
+}
+
+.login-buttons {
+    float:left;
+    align-items: center;
+}
+.login-buttons button{
+
+    margin-left: 10px;
+}
+
+input {
+    width: 100%; /* Ocupa 100% da login-box */
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border: none;
+    border-radius: 0.3125rem;
+    text-align: center;
+    outline: none;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%; /* Ocupa 100% da login-box */
+    background-color: #61dafb;
+    color: #000;
+    font-weight: bold;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+button:hover {
+    background-color: #4ec2e0;
+}
+
+/* -------------------- RESPONSIVIDADE -------------------- */
+
+/* Para telas médias/tablets */
+@media (min-width: 480px) and (max-width: 768px) {
+    .login-box {
+        padding: 2rem;
+        width: 80%;
+        max-width: 400px;
+    }
+
+    input, button {
+        font-size: 1rem;
+    }
+}
+
+.error {
+    color: #ff4d4d;
+    font-size: 0.85rem;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+
+/* Para telas grandes / desktops */
+@media (min-width: 769px) {
+    .login-box {
+        width: 22.5rem; /* Mantém proporção original */
+        padding: 2rem;
+    }
+
+    input {
+        width: 15.6rem;
+        font-size: 1rem;
+    }
+
+    button {
+        width: auto;
+        font-size: 1rem;
+        padding: 0.6rem 1.2rem;
+    }
+}

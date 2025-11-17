@@ -6,6 +6,7 @@ import {UserContextService} from '../../services/context/context';
 import {DataService} from '../../db.service';
 import {RsaService} from '../../services/rsa/rsa-service';
 import * as bcrypt from 'bcryptjs';
+import { error } from 'console';
 
 @Component({
 	selector: 'app-login',
@@ -18,6 +19,9 @@ export class LoginComponent {
 	username: string = '';
 	password: string = '';
 	isButtonDisabled = false;
+	otpCode: string = '';          // <--- NEW
+    twoFactorStep: boolean = false; // <--- NEW
+    userIdFromServer!: number;     // <--- NEW
 
 	constructor(
 		private router: Router,
@@ -53,64 +57,43 @@ export class LoginComponent {
                     alert("Senha inválida")
                     this.isButtonDisabled = false;
                 }else{
-                    this.userContext.updateState({
-                        id: userData.user_id,
-                        name: trimmedUsername,
-                        chats: userData.user_rooms,
-				    });
-
-                    console.log("PUBLIC_KEY:\n", publicPem)
-                    console.log("PRIVATE_KEY:\n", privatePem)
-
-                    this.router.navigate([`/home/${trimmedUsername}`]);
+                    this.twoFactorStep = true;
+                    this.userIdFromServer = userData.user_id;
+                    this.isButtonDisabled = false;
                 }
 			}
 		});
 	}
 
+	async verifyOTP() {
+        this.isButtonDisabled = true;
+
+        this.api.verify2FA(this.userIdFromServer, this.otpCode).subscribe({
+            next: async (verifyData: any) => {
+                // Update user context
+                this.userContext.updateState({
+                    id: this.userIdFromServer,
+                    name: this.username,
+                    chats: verifyData.user_rooms
+                });
+
+                this.router.navigate([`/home/${this.username}`]);
+            },
+			error: (err) => {
+				this.isButtonDisabled = false;
+
+				if (err.status === 401) {
+					alert("Código inválido ou expirado!");
+					return;
+				}
+
+				alert("Erro inesperado!");
+				console.error(err);
+			}
+        });
+    }
 
 	async create_account(){
-        this.isButtonDisabled = true;
-		const trimmedUsername = this.username.trim();
-        const trimmedPassword = this.password.trim()
-
-		if (!trimmedUsername || !trimmedPassword) return;
-        console.log("Creating account...")
-
-		const {publicKey, privateKey} = await this.rsa.generateRSAKeyPair();
-
-		const publicPem = await this.rsa.exportPublicKey(publicKey);
-
-		const privatePem = await this.rsa.exportPrivateKey(privateKey);
-
-		// Se tiver persistencia de login tem q ver essa parada aqui
-		localStorage.setItem(`private_key_${trimmedUsername}`, privatePem);
-
-        const password_hash = await bcrypt.hash(trimmedPassword, 10)
-        let utf8Encode = new TextEncoder();
-        const password_hash_bytes_uint = utf8Encode.encode(password_hash);
-        let password_hash_bytes = Array.from(password_hash_bytes_uint)
-
-
-		this.api.create_account(trimmedUsername, publicPem, password_hash_bytes).subscribe({
-			next: (userData: any) => {
-				if (userData.user_id == -1){
-                    alert("Usuário " + this.username + " já existe")
-                    this.isButtonDisabled = false;
-                }else{
-                    this.userContext.updateState({
-                        id: userData.user_id,
-                        name: trimmedUsername,
-                        chats: userData.user_rooms,
-				    });
-
-                    console.log("Hash da senha:", password_hash)
-                    console.log("PUBLIC_KEY:\n", publicPem)
-                    console.log("PRIVATE_KEY:\n", privatePem)
-
-                    this.router.navigate([`/home/${trimmedUsername}`]);
-                }
-			}
-		});
+        this.router.navigate([`/register`])
 	}
 }

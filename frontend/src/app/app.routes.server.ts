@@ -6,6 +6,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'register',
+    renderMode: RenderMode.Server
+  },
+  {
     path: 'home/:username',
     renderMode: RenderMode.Server
   },

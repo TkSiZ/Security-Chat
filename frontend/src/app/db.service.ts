@@ -28,9 +28,9 @@ export class DataService {
         );
     }
 
-    create_account(inputUserName: string, publicKeyInput: any, password_hash_bytes: number[]): Observable<UserBackendResponse> {
+    create_account(inputUserName: string, publicKeyInput: any, password_hash_bytes: number[], email: string): Observable<UserBackendResponse> {
         const url = `${this.baseUrl}/create_account`;
-        const payload = {username: inputUserName, public_key: publicKeyInput, password_hash_bytes: password_hash_bytes}
+        const payload = {username: inputUserName, public_key: publicKeyInput, password_hash_bytes: password_hash_bytes, email: email}
         console.log("Payload:", payload)
 
         return this.http.put<UserBackendResponse>(url, payload);
@@ -136,5 +136,17 @@ export class DataService {
                 user_id: userIdInput
             }
         })
+    }
+
+    verify2FA(user_id: number, otpCode: string){
+        const url = `${this.baseUrl}/auth`
+
+        return this.http.get<any>(url, {
+            params: {
+                user_id: user_id,
+                otpCode: otpCode
+            }
+        }
+        )
     }
 }

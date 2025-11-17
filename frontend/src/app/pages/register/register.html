@@ -1,0 +1,47 @@
+<div class="login-container">
+    <h1>Registre-se</h1>
+
+    <div class="login-box">
+        @if (true) {
+
+            <input
+                [(ngModel)]="email"
+                #emailInput="ngModel"
+                type="email"
+                placeholder="Digite seu email"
+                required
+                email
+            />
+
+            <div *ngIf="emailInput.invalid && emailInput.touched" class="error">
+                Email inválido
+            </div>
+
+            <input
+                [(ngModel)]="username"
+                type="text"
+                placeholder="Digite seu nome de usuário"
+            />
+
+            <input
+                [(ngModel)]="password"
+                type="password"
+                placeholder="Digite sua senha"
+            />
+
+            <div class="login-buttons">
+                <button 
+                    (click)="create_account()" 
+                    [disabled]="emailInput.invalid || !username || !password"
+                >
+                    Criar Conta
+                </button>
+            </div>
+
+        } @else {
+            <div class="loading">
+                Carregando<span class="dots"></span>
+            </div>
+        }
+    </div>
+</div>

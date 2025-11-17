@@ -2,24 +2,37 @@
     <h1>Bem-vindo ao Secure Chat</h1>
 
     <div class="login-box">
-        @if (!isButtonDisabled) {
-            <input
-                [(ngModel)]="username"
-                type="text"
-                placeholder="Digite seu nome de usuário"
-            />
-            <input
-                [(ngModel)]="password"
-                type="text"
-                placeholder="Digite sua senha"
-            />
-            <div class="login-buttons">
-                <button (click)="create_account()">Criar Conta </button>
-                <button (click)="login()">Logar </button>
-            </div>
-        } @else {
+
+        <!-- MOSTRA LOADING SE isButtonDisabled = true -->
+        @if (isButtonDisabled) {
             <div class="loading">
                 Carregando<span class="dots"></span>
+            </div>
+        }
+
+        <!-- STEP 1: USERNAME + PASSWORD -->
+        @else if (!twoFactorStep) {
+            <input [(ngModel)]="username" type="text" placeholder="Digite seu nome de usuário" />
+            <input [(ngModel)]="password" type="password" placeholder="Digite sua senha" />
+
+            <div class="login-buttons">
+                <button (click)="create_account()">Criar Conta</button>
+                <button (click)="login()" [disabled]="!username || !password">
+                    Logar
+                </button>
+            </div>
+        }
+
+        <!-- STEP 2: OTP CODE -->
+        @else {
+            <h3>Digite o código enviado para seu e-mail</h3>
+
+            <input [(ngModel)]="otpCode" maxlength="6" placeholder="123456" />
+
+            <div class="login-buttons">
+                <button (click)="verifyOTP()" [disabled]="!otpCode">
+                    Verificar Código
+                </button>
             </div>
         }
 
