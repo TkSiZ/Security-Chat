@@ -37,6 +37,15 @@ def get_all_users():
 
     return {"users": users}
 
+@app.post("/usernames")
+def get_usernames(user_ids: list[int]):
+    return utils.get_usernames(user_ids)
+
+@app.get("/usernames_in_room")
+def get_usernames_in_room(room_id: int):
+    return utils.get_usernames_in_room(room_id)
+
+
 @app.put("/update_user_in_room")
 def update_user_in_room_rows(users: Users):
     utils.update_user_in_room_rows(users)

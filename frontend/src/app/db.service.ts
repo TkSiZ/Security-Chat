@@ -48,6 +48,13 @@ export class DataService {
         });
     }
 
+    getUsernames(user_ids: number[]): Observable<any> {
+        const url = `${this.baseUrl}/usernames`;
+        console.log("Vou tentar getUsernames")
+
+        return this.http.post<Chat>(url, user_ids);
+    }
+
     updateUserChat(userIdInput: number, room_id: number): Observable<any> {
         const url = `${this.baseUrl}/join_room/${room_id}`;
 
@@ -111,6 +118,16 @@ export class DataService {
     }
 
     getAllUsersInChat(chat_id: number): Observable<any> {
+        const url = `${this.baseUrl}/usernames_in_room`
+
+        return this.http.get<any>(url, {
+            params: {
+                room_id: chat_id
+            }
+        })
+    }
+
+    getActiveUsersInChat(chat_id: number): Observable<any> {
         const url = `${this.baseUrl}/users_in_room`
 
         return this.http.get<any>(url, {

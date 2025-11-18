@@ -12,9 +12,9 @@
 
 .chat-header {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;               
-  justify-content: center; 
-  align-items: center;         
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(15px);
   color: #e2e8f0;
@@ -76,7 +76,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   align-items: center;
-  justify-content: center;  
+  justify-content: center;
   place-items: center;
   height: 100vh;
   text-align: center;
@@ -172,7 +172,7 @@ align-self: center;             /* center in the chat column */
 }
 
 .text {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.95rem;
   line-height: 1.4;
   color: #f1f5f9;
@@ -199,4 +199,12 @@ align-self: center;             /* center in the chat column */
 
 .copy-btn:hover {
   color: #fbbf24;
+}
+
+.total-user-list {
+  background: rgba(15, 15, 35, 0.7);
+}
+
+.active-user-list {
+  background: rgba(15, 15, 35, 0.7);
 }

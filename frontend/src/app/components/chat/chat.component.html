@@ -1,51 +1,63 @@
 @if (currentChat === null) {
-  <div class="loading">
-    Carregando<span class="dots"></span>
-  </div>
+    <div class="loading">
+        Carregando<span class="dots"></span>
+    </div>
 } @else {
-  <div class="chat-container">
-    <header class="chat-header">
-      <h3 class="chat-name">{{ currentChat.name}}</h3>
-      <button class="copy-btn" (click)="copyChatId()" title="Copiar ID">📋</button>
-    </header>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h3 class="chat-name">{{ currentChat.name }}</h3>
+            <button class="copy-btn" (click)="copyChatId()" title="Copiar ID">📋</button>
+        </header>
 
 
 
-    
-    @if (messages.length) {
-      <section class="messages" #messagesContainer>
-        @for (message of messages; track message) {
-          @if (message.type !== 'KEY'){
-            @if (message.type === 'MSG'){
-              <div
-                class="message"
-                [class.me]="message.author === author"  
-                [class.received]="message.author !== author"
-                >
-                  <div class="author">
-                    {{ message.author }}
-                  </div>
 
-                  <div class="text">{{message.text}}</div>
+        @if (messages.length) {
+            <section class="messages" #messagesContainer>
+                @for (message of messages; track message) {
+                    @if (message.type !== 'KEY') {
+                        @if (message.type === 'MSG') {
+                            <div
+                                class="message"
+                                [class.me]="message.author === author"
+                                [class.received]="message.author !== author"
+                            >
+                                <div class="author">
+                                    {{ message.author }}
+                                </div>
 
-              </div>
-            } @else{
-              <div class="status">
-                <div class="status.text">
-                  {{message.text}}
-                </div>
-              </div>
-            }
-          }
+                                <div class="text">{{ message.text }}</div>
+
+                            </div>
+                        } @else {
+                            <div class="status">
+                                <div class="status.text">
+                                    {{ message.text }}
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </section>
+        } @else {
+            <section class="no_messages">
+                <p>Sem mensagens</p>
+            </section>
         }
-      </section>
-    } @else {
-      <section class="no_messages">
-        <p>Sem mensagens</p>
-      </section>
-    }
-    @if (is_able_to_send){
-      <app-text-box (sendMessageChild)="sendMessage($event, false)"></app-text-box>
-    }
-  </div>
+        @if (is_able_to_send) {
+            <div class="total-user-list">
+                Usuários:
+                @for (user of total_users_str; track user) {
+                    {{ user }},
+                }
+            </div>
+            <div class="active-user-list">
+<!--                Usuários ativos:-->
+<!--                @for (user of active_users_str; track user) {-->
+<!--                    {{ user }},-->
+<!--                }-->
+            </div>
+            <app-text-box (sendMessageChild)="sendMessage($event, false)"></app-text-box>
+        }
+    </div>
 }

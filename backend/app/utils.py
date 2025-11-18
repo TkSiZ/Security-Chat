@@ -140,28 +140,8 @@ def new_admin(user_id:int, room_id:int):
     print(f"[DEBUG] New Admin of room '{room_id}' is '{user_id}'")
 
 def updated_chats(user_name: str):
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT
-    )
-
-    cur = conn.cursor()
-
-    cur.execute(
-        """SELECT * FROM "User" WHERE username = %s;""",
-        (user_name,)
-    )
-
-    user = cur.fetchone()
-
     # Get full user info
     user_info = get_user_info(user_name)
-
-    cur.close()
-    conn.close()
 
     print(f"User {user_name} logged in")
 
@@ -289,6 +269,48 @@ def get_public_keys(users: list[int]):
     conn.close()
 
     return keys_dict
+
+def get_usernames(user_ids: list[int]):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+    cur = conn.cursor()
+
+    cur.execute("""SELECT user_id, username
+                   FROM "User"
+                   WHERE user_id IN %s""",
+                (tuple(user_ids),))
+
+    query = cur.fetchall()
+    usernames = []
+    for user in query:
+        usernames.append(user[1])
+
+    cur.close()
+    conn.close()
+
+    return usernames
+
+def get_usernames_in_room(room_id :int):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+    cur = conn.cursor()
+
+    cur.execute("""SELECT username
+                   FROM "User"
+                   WHERE user_id IN (SELECT user_id
+                                     FROM "User_In_Room"
+                                     WHERE room_id = %s)""",
+                (room_id,))
+
+    users = cur.fetchall()
+
+    usernames = []
+    for user in users:
+        usernames.append(user[0])
+
+    cur.close()
+    conn.close()
+
+    return usernames
+
 
 def create_room(
         room_id:int,

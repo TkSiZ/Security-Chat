@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 # pycharm
 .idea/
 *.pyc
+*.pyc
