@@ -129,6 +129,7 @@ async def websocket_endpoint(
         while True:
             data = await websocket.receive_text()
             message = json.loads(data)
+            print(message)
             await manager.broadcast(message, room_id, user_id)
     except WebSocketDisconnect:
         manager.disconnect(room_id, user_id)
@@ -159,7 +160,4 @@ def otpVerification(user_id: int, otpCode: str, request: Request):
     if not is_valid:
         raise HTTPException(status_code=401, detail="Invalid or expired OTP")
 
-    return {
-        "status": "success",
-        "message": "OTP verified successfully"
-    }
+    return utils.get_user_info_via_id(user_id)

@@ -36,6 +36,7 @@ export class UserContextService {
   addChat(idInput: number, nameInput: string, adminInput: number) {
     const state = this._state.value;
     const newChat: Chat = { id: idInput, name:nameInput, admin: adminInput };
+    console.log(this._state.value)
     this._state.next({
       ...state,
       chats: [...state.chats, newChat],

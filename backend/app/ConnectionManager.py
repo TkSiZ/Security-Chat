@@ -50,7 +50,8 @@ class ConnectionManager:
                     "user_id": message["user_id"],
                     "text": message["text"],
                     "type": message["type"],
-                    "destination": message["destination"]
+                    "destination": message["destination"],
+                    "hash": message["hash"]
                 }
                 try:
                     await websocket.send_json(payload)

@@ -68,6 +68,7 @@ export class SidebarComponent {
       console.log(roomNameInput)
 
       const roomData = await firstValueFrom(this.api.createChat(payload))
+      console.log(roomData)
       this.userContext.addChat(roomData.room_id, roomData.room_name, this.userId!)
 
       chatNameInput.value = ''

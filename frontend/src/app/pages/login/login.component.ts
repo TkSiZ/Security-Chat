@@ -77,6 +77,9 @@ export class LoginComponent {
                     chats: verifyData.user_rooms
                 });
 
+				console.log("Salas do usuário")
+				console.log(verifyData.user_rooms)
+
                 this.router.navigate([`/home/${this.username}`]);
             },
 			error: (err) => {

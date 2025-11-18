@@ -85,6 +85,12 @@ async importPublicKey(pem: string): Promise<CryptoKey> {
   );
 }
 
+async hashSHA256(message: string): Promise<string> {
+  const encoded = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+  return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
+}
+
 
   // Helper
   private arrayBufferToString(buffer: ArrayBuffer): string {

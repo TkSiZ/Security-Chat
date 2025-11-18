@@ -5,7 +5,7 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS public."Room"
 (
-    room_id character varying(4)[] NOT NULL,
+    room_id integer NOT NULL,
     admin integer NOT NULL,
     name character varying(30) NOT NULL,
     PRIMARY KEY (room_id)
@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS public."User"
     user_id serial NOT NULL,
     username character varying(30) COLLATE pg_catalog."default" NOT NULL,
     public_key character varying(1000) NOT NULL,
+    password_hash bytea NOT NULL,
+    email character varying NOT NULL,
     PRIMARY KEY (user_id),
     UNIQUE (username)
 );

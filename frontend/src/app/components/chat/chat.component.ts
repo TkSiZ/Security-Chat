@@ -135,8 +135,24 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
           this.shouldScroll = this.isAtBottom();
           if (msg.type === this.type_is_message){
             console.log("Message text encrypted", msg)
+            const decryptedText = decrypt3DES(msg.text, this.tripleDES_key);
             msg.text = decrypt3DES(msg.text, this.tripleDES_key)
             console.log("Message Decrypted", msg)
+
+            if (msg.hash) {
+              console.log("Verificando Integridade da Mensagem")
+              const calculatedHash = await this.rsa.hashSHA256(decryptedText);
+              console.log("Hash recebido pela mensagem:", msg.hash)
+              console.log(`Mensagem recebida pelo texto ${decryptedText} ||| Mesmo texto, porém em hash: ${calculatedHash}`) 
+
+              if (calculatedHash !== msg.hash) {
+                console.error("❌ MESSAGE TAMPERED! HASH DOES NOT MATCH!");
+                msg.text += "  ⚠️ (Integrity Check Failed)";
+              } else {
+                console.log("✔ Integrity OK — hash matches");
+              }
+            }            
+
             this.messages.push(msg);
           }
           else{
@@ -233,12 +249,13 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
     this.stateSub?.unsubscribe();
   }
 
-  sendMessage(text: string, is_log: boolean): void {
+  async sendMessage(text: string, is_log: boolean): Promise<void> {
     // TODO: criptografar a mensagem usando a chave 3des
     if (!this.chatId || !this.userId || !text.trim()) return;
     let authorInMessage
     let messageType
     let messageToSend
+    let hash_sig
     if(is_log){
       authorInMessage = 'server'
       messageType = 'JOIN'
@@ -247,9 +264,23 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
       authorInMessage = this.author
       messageType = 'MSG'
       messageToSend = encrypt3DES(text.trim(), this.tripleDES_key)
+    const originalText = text.trim();
+    hash_sig = await this.rsa.hashSHA256(originalText);
+    console.log("Mensagem enviada com HASH:", hash_sig);
     }
 
-    const message: Message = { text: messageToSend, user_id: this.userId, author: authorInMessage, type: messageType, destination: null };
+    
+
+    // 2️⃣ MONTAR A MENSAGEM COM O HASH
+    const message: Message = {
+      text: messageToSend,
+      user_id: this.userId,
+      author: authorInMessage,
+      type: messageType,
+      destination: null,
+      hash: hash_sig ? hash_sig:null
+    };
+
     this.chatService.sendMessage(this.chatId, message);
   }
 
@@ -287,7 +318,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
       console.log("Encrypting 3DES key to send to user:", user_id);
       const tripleDESEncrypted = await this.rsa.encryptMessage(public_key_object, key);
 
-      const message: Message = { text: tripleDESEncrypted, user_id: this.userId, author: this.author, type: this.type_is_key, destination: user_id };
+      const message: Message = { text: tripleDESEncrypted, user_id: this.userId, author: this.author, type: this.type_is_key, destination: user_id, hash: null };
       console.log("Sent 3DES KEY ENCRYPTED:\n" + tripleDESEncrypted);
       this.chatService.sendMessage(this.chatId, message);
 

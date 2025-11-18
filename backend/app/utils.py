@@ -366,6 +366,43 @@ def get_user_email(username: str):
 
     return  user_email
 
+def get_user_info_via_id(id: int):
+    conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+
+    cur = conn.cursor()
+
+    user_id = id
+
+    # rooms where user is
+    cur.execute("""SELECT * FROM "User_In_Room" WHERE user_id = %s""", (user_id,))
+
+    user_in_room_rows = cur.fetchall()
+    user_rooms = []
+    for row in user_in_room_rows:
+        room_id = row[0]
+        cur.execute("""SELECT *
+                       FROM "Room"
+                       WHERE room_id = %s""", (room_id,))
+        room_info = cur.fetchone()
+        user_rooms.append({
+            "id" : room_info[0],
+            "name": room_info[2],
+            "admin": room_info[1]
+        })
+
+    # rooms user admins
+    user_admins = []
+    for user_room in user_rooms:
+        room_id = user_room["id"]
+        cur.execute("""SELECT * FROM "Room" WHERE room_id = %s""", (room_id,))
+        room = cur.fetchone()
+        if room[1] == user_id:
+            user_admins.append(room[0])
+
+    cur.close()
+    conn.close()
+
+    return {"user_id" : user_id, "user_rooms": user_rooms, "user_admins": user_admins}
 
 def get_user_info(username:str):
     conn = psycopg2.connect( host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
