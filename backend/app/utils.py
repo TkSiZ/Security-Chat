@@ -329,7 +329,10 @@ def create_room(
 
     if cur.fetchone():
         print(f"Room '{room_id}'already exists")
-        return {"msg" : f"Room '{room_id}'already exists"}
+        return {
+            "msg" : -1,
+            "description" : f"Room '{room_id}'already exists",
+        }
 
     # check if user exists
     cur.execute(
@@ -339,7 +342,10 @@ def create_room(
     user = cur.fetchone()
     if not user_id:
         print(f"User of ID '{user_id}' does not exist")
-        return {"msg": f"User of ID '{user_id}' does not exist"}
+        return {
+            "msg": -2,
+            "description": f"User of ID '{user_id}' does not exist"
+        }
 
     # create room
     cur.execute(

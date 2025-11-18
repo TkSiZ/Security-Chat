@@ -53,8 +53,12 @@ export class SidebarComponent {
       user_id: Number(el.value)
     }));
 
-    if (isNaN(chatCode) || !roomNameInput ) {
-      alert("Chat code inválido ou Nome do chat Vazio")
+    if (isNaN(chatCode) ) {
+      alert("Chat code inválido ")
+    } else if (!roomNameInput){
+      alert("Nome do chat Vazio")
+    } else if (!selectedUsers.length){
+      alert("Nenhum usuário selecionado!")
     } else {
       console.log("Chat code is:", chatCode);
       // create Chat
@@ -68,6 +72,10 @@ export class SidebarComponent {
       console.log(roomNameInput)
 
       const roomData = await firstValueFrom(this.api.createChat(payload))
+      if (roomData.msg == -1){
+          alert("Sala " + chatCode + " já existe!")
+          return
+      }
       console.log(roomData)
       this.userContext.addChat(roomData.room_id, roomData.room_name, this.userId!)
 
