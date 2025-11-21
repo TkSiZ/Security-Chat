@@ -41,7 +41,6 @@ export class DataService {
 
         return this.http.post<Chat>(url, null, {
             params: {
-                room_id: chat.room_id,
                 room_name: chat.room_name,
                 user_id: chat.user_id
             }

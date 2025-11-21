@@ -334,7 +334,6 @@ def get_usernames_in_room(room_id :int):
 
 
 def create_room(
-        room_id:int,
         room_name:str,
         user_id:int,
 ):
@@ -342,18 +341,6 @@ def create_room(
 
     cur = conn.cursor()
 
-    # check if room exists
-    cur.execute(
-        """SELECT * FROM "Room" WHERE room_id = %s;""",
-        (room_id,)
-    )
-
-    if cur.fetchone():
-        print(f"Room '{room_id}'already exists")
-        return {
-            "msg" : -1,
-            "description" : f"Room '{room_id}'already exists",
-        }
 
     # check if user exists
     cur.execute(
@@ -370,9 +357,11 @@ def create_room(
 
     # create room
     cur.execute(
-        """INSERT INTO "Room" (room_id, admin, name) VALUES (%s, %s, %s);""",
-        (room_id, user_id, room_name)
+        """INSERT INTO "Room" (admin, name) VALUES (%s, %s) RETURNING room_id;""",
+        (user_id, room_name)
     )
+
+    room_id = cur.fetchone()[0]
 
     # update user in room
     cur.execute(

@@ -109,8 +109,8 @@ def get_room(room_id: int = Query(...)):
 
 
 @app.post("/create_room")
-def create_room(room_id: int, room_name: str, user_id: int):
-    return utils.create_room(room_id, room_name, user_id)
+def create_room(room_name: str, user_id: int):
+    return utils.create_room(room_name, user_id)
 
 
 @app.delete("/test/delete_room")

@@ -5,7 +5,6 @@ interface Chat{
 }
 
 interface CreateChat{
-    room_id: number,
     room_name: string,
     user_id: number,
 }

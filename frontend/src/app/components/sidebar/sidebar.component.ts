@@ -45,9 +45,8 @@ export class SidebarComponent {
     });
   }
 
-  async createChat(chatNameInput: HTMLInputElement, chatCodeInput: HTMLInputElement ) {
+  async createChat(chatNameInput: HTMLInputElement ) {
     const roomNameInput = chatNameInput.value.trim();
-    const chatCode = Number(chatCodeInput.value.trim())
 
     const selectedUsers = Array.from(
       document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked')).map(el => JSON.stringify({
@@ -55,18 +54,14 @@ export class SidebarComponent {
       user_id: Number(el.value)
     }));
 
-    if (isNaN(chatCode) ) {
-      alert("Chat code inválido ")
-    } else if (!roomNameInput){
+    if (!roomNameInput){
       alert("Nome do chat Vazio")
     } else if (!selectedUsers.length){
       alert("Nenhum usuário selecionado!")
     } else {
-      console.log("Chat code is:", chatCode);
       // create Chat
       const payload : CreateChat = {
         user_id: this.userId!,
-        room_id: chatCode,
         room_name: roomNameInput
       }
 
@@ -74,22 +69,17 @@ export class SidebarComponent {
       console.log(roomNameInput)
 
       const roomData = await firstValueFrom(this.api.createChat(payload))
-      if (roomData.msg == -1){
-          alert("Sala " + chatCode + " já existe!")
-          return
-      }
       console.log(roomData)
       this.userContext.addChat(roomData.room_id, roomData.room_name, this.userId!)
 
       chatNameInput.value = ''
-      chatCodeInput.value = ''
       this.showCreatePopup = false;
 
       // add users in room
-      console.log("Adding selected users to chat", chatCode);
+      console.log("Adding selected users to chat", roomData.room_id);
       console.log(selectedUsers);
 
-      const _ = await firstValueFrom(this.api.updateUserInRoom(selectedUsers, chatCode))
+      const _ = await firstValueFrom(this.api.updateUserInRoom(selectedUsers, roomData.room_id))
     }
   }
 
@@ -127,8 +117,8 @@ export class SidebarComponent {
   }
 
   async ngOnInit(){
-    // Updates user's rooms every interval defined by pollInterval
-    return timer(0, this.pollInterval).pipe(
+    // Updates user's rooms and all users
+    timer(0, this.pollInterval).pipe(
       switchMap(() => this.api.getUserRooms(this.userId!)),
 
       // tap((response : any) => {
@@ -166,6 +156,16 @@ export class SidebarComponent {
             this.userContext.addChat(room_id, rooms[room_id], this.userId!)
           }
         }
+
+
+        // updates all users
+        this.api.getAllUsers().subscribe({
+          next: (response: any) => {
+            this.users = response.users;
+            },
+          error: (err) => console.error("Failed to get all users in sidebar.component.ts", err)
+        });
+
       }
     })
 
