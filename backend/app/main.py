@@ -29,6 +29,9 @@ class LoginInfo(BaseModel):
     password_hash_bytes: list[int]
     email: str
 
+@app.get("/")
+def root():
+    return {"status":"ok"}
 
 @app.get("/all_users")
 def get_all_users():
