@@ -37,6 +37,7 @@ def get_all_users():
 
     return {"users": users}
 
+
 @app.post("/usernames")
 def get_usernames(user_ids: list[int]):
     return utils.get_usernames(user_ids)
@@ -48,6 +49,7 @@ def get_usernames_in_room(room_id: int):
 
 @app.put("/update_user_in_room")
 def update_user_in_room_rows(users: Users):
+    """Inserts users in a room"""
     utils.update_user_in_room_rows(users)
     return
     
@@ -159,6 +161,15 @@ def is_admin_of_room(user_id: int, room_id: int):
 @app.get("/updatedChat")
 def get_updated_chat(user_name : str):
     return utils.updated_chats(user_name)
+
+
+@app.get("/user_rooms")
+def get_user_rooms(user_id: int|None):
+    """Returns the room id and room name of all rooms user is in"""
+    if user_id is None:
+        return {}
+    return utils.get_user_rooms(user_id)
+
 
 @app.get("/auth")
 def otpVerification(user_id: int, otpCode: str, request: Request):

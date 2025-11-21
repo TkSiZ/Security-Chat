@@ -6,7 +6,7 @@ import { UserContextService } from '../../services/context/context';
 import { Chat, CreateChat } from '../../types/chats';
 import { User } from '../../types/user';
 import { DataService } from '../../db.service';
-import {firstValueFrom} from 'rxjs';
+import {catchError, firstValueFrom, switchMap, tap, throwError, timer} from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
@@ -23,6 +23,8 @@ export class SidebarComponent {
   userId: number| null = null;
   room_id : number| null = null;
   users: User[] = [];
+
+  pollInterval: number = 5000; // tempo em ms entre chamadas para atualizar as salas
 
   constructor(
     private userContext: UserContextService,
@@ -110,6 +112,7 @@ export class SidebarComponent {
         this.showConnectPopup = false;
       }
     })
+
     this.api.updateUserChat(this.userId!, this.room_id).subscribe({
       next: (roomMessage: any) => {
         alert("Chat do usuário atualizado no banco")
@@ -121,5 +124,50 @@ export class SidebarComponent {
   logout(): void {
     this.userContext.delState();
     this.router.navigateByUrl('/', { replaceUrl: true });
+  }
+
+  async ngOnInit(){
+    // Updates user's rooms every interval defined by pollInterval
+    return timer(0, this.pollInterval).pipe(
+      switchMap(() => this.api.getUserRooms(this.userId!)),
+
+      // tap((response : any) => {
+      //   console.log("User rooms: ", response)
+      // }),
+
+      catchError((err) => {
+        console.error('Erro ao obter user rooms:', err);
+        return throwError(() => err);
+      }),
+
+    ).subscribe({
+      next: (rooms:any) => {
+        const room_ids: number[] = Object.keys(rooms).map(Number)
+        let existing_room_ids: number[] = []
+
+        for (let chat of this.userContext.state.chats){
+          existing_room_ids.push(chat.id)
+        }
+
+        let already_exists = false
+        for (let room_id of room_ids){
+          already_exists = false
+
+          for (let existing_id of existing_room_ids){
+            if (room_id == existing_id){
+              already_exists = true;
+              break
+            }
+          }
+
+          if (!already_exists){
+            console.log("Room", room_id, "not in existing rooms")
+            console.log("Adding room_id", room_id, " with name", rooms.room_id, " to user", this.userId!)
+            this.userContext.addChat(room_id, rooms[room_id], this.userId!)
+          }
+        }
+      }
+    })
+
   }
 }

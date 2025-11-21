@@ -52,10 +52,10 @@
                 }
             </div>
             <div class="active-user-list">
-<!--                Usuários ativos:-->
-<!--                @for (user of active_users_str; track user) {-->
-<!--                    {{ user }},-->
-<!--                }-->
+                Usuários ativos:
+                @for (user of active_users_str; track user) {
+                    {{ user }},
+                }
             </div>
             <app-text-box (sendMessageChild)="sendMessage($event, false)"></app-text-box>
         }

@@ -50,7 +50,6 @@ export class DataService {
 
     getUsernames(user_ids: number[]): Observable<any> {
         const url = `${this.baseUrl}/usernames`;
-        console.log("Vou tentar getUsernames")
 
         return this.http.post<Chat>(url, user_ids);
     }
@@ -113,6 +112,16 @@ export class DataService {
         return this.http.get<any>(url, {
             params: {
                 user_name: user_name
+            }
+        })
+    }
+
+    getUserRooms(user_id: number): Observable<any> {
+        const url = `${this.baseUrl}/user_rooms`
+
+        return this.http.get<any>(url, {
+            params: {
+                user_id: user_id
             }
         })
     }

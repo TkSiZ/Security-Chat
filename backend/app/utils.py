@@ -150,6 +150,27 @@ def updated_chats(user_name: str):
     }
 
 
+def get_user_rooms(user_id: int):
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+    cur = conn.cursor()
+
+    cur.execute("""SELECT room_id, name
+                   FROM "Room"
+                   WHERE room_id IN (SELECT room_id
+                                     FROM "User_In_Room"
+                                     WHERE user_id = (%s))""",
+                (user_id,))
+
+    rooms = cur.fetchall()
+
+    payload = {} # {room_id : room_name}
+
+    for room in rooms:
+        payload[room[0]] = room[1]
+
+    return payload
+
+
 def update_admin(user_id:int, room_id:int, users_in_room : dict[int, WebSocket]):
     """When a user disconnects from a websocket, this function should be called to update admin"""
     conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)

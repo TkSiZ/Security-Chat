@@ -16,7 +16,7 @@ import {Chat} from '../../types/chats';
 import {ChatService} from '../../services/chat/chat';
 import {UserContextService} from '../../services/context/context';
 import {TextBoxComponent} from './text-box/text-box.component';
-import {Subscription, firstValueFrom} from 'rxjs'; // Import firstValueFrom
+import {Subscription, firstValueFrom, timer, switchMap, catchError, throwError} from 'rxjs'; // Import firstValueFrom
 import {decrypt3DES, encrypt3DES, generate3DESKey} from '../../utils/encryption';
 import {DataService} from '../../db.service';
 import {RsaService} from '../../services/rsa/rsa-service';
@@ -48,6 +48,8 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
     type_is_key = 'KEY';
     is_able_to_send: boolean = false
 
+    pollInterval: number = 5000
+
 
     private stateSub!: Subscription;
     private isBrowser: boolean;
@@ -77,7 +79,32 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
     }
 
     ngOnInit() {
-        this.privateKeyPromise = this.loadPrivateKey();
+      this.privateKeyPromise = this.loadPrivateKey();
+
+      // Update active_users
+      return timer(0, this.pollInterval).pipe(
+      switchMap(() => this.api.getActiveUsersInChat(this.chatId)),
+
+      // tap((response : any) => {
+      //   console.log("Usarios ativos: ", response)
+      // }),
+
+      catchError((err) => {
+        console.error('Erro ao obter usuarios ativos na sala:', err);
+        return throwError(() => err);
+      }),
+
+      ).subscribe({
+        next: (response: any) => {
+          this.active_users_id = response.users;
+
+          this.api.getUsernames(this.active_users_id).subscribe({
+          next: (response: any) => {
+          this.active_users_str = response
+            }
+          })
+        }
+      })
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -154,20 +181,6 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
                         console.log("consegui")
                     }
                 })
-
-                // Update active_users
-                this.api.getActiveUsersInChat(this.chatId).subscribe({
-                    next: (response: any) => {
-                        this.active_users_id = response.users;
-
-                        this.api.getUsernames(this.active_users_id).subscribe({
-                            next: (response: any) => {
-                                this.active_users_str = response
-                            }
-                        })
-                    }
-                })
-
 
                 // 3. Setup the message listener
                 this.chatService.onMessage(this.chatId, async (msg: Message) => {
