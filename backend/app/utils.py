@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 from fastapi import WebSocket
 from pydantic import BaseModel
 import time
+import ssl
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+    
 
 
 load_dotenv()
@@ -44,29 +49,28 @@ def otpVerification(user_id: int, otpCode: str, app) -> bool:
     return True
 
 def send_email_code(recipient, user_id, app):
-    RESEND_KEY = "re_S8ixQ7Bm_NEUffQnPFypxqEt8z1tQGEus"
+    EMAIL_KEY = os.getenv('EMAIL_KEY')
     code = generate_otp()
     saveOtp(user_id, code, app)
     print(recipient)
-    response = requests.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {RESEND_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "from": "security-chat@resend.dev",
-            "to": recipient,
-            "subject": "OTP Code",
-            "text": f"Seu código é: {code}"
-        }
+
+    # Ignorar SSL (apenas teste, não usar em produção)
+    # ssl._create_default_https_context = ssl._create_unverified_context 
+
+    sg = SendGridAPIClient(EMAIL_KEY)
+
+    message = Mail(
+        from_email='siithard2005@gmail.com',
+        to_emails=recipient,
+        subject='OTP CODE',
+        html_content=f'Your code: {code}'
     )
-    print("Reached function")
-    print("User:", user_id)
-    print("Recipient:", recipient)
-    print(response.status_code)
-    print(response.text)
-    
+
+    try:
+        response = sg.send(message)
+        print(response.status_code)
+    except Exception as e:
+        print(str(e))
     
 
 class Users(BaseModel):
