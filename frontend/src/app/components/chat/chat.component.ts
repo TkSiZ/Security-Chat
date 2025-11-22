@@ -16,7 +16,7 @@ import {Chat} from '../../types/chats';
 import {ChatService} from '../../services/chat/chat';
 import {UserContextService} from '../../services/context/context';
 import {TextBoxComponent} from './text-box/text-box.component';
-import {Subscription, firstValueFrom, timer, switchMap, catchError, throwError} from 'rxjs'; // Import firstValueFrom
+import {Subscription, firstValueFrom, timer, switchMap, catchError, throwError, of} from 'rxjs'; // Import firstValueFrom
 import {decrypt3DES, encrypt3DES, generate3DESKey} from '../../utils/encryption';
 import {DataService} from '../../db.service';
 import {RsaService} from '../../services/rsa/rsa-service';
@@ -52,6 +52,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
 
 
     private stateSub!: Subscription;
+    private activeUsersSub!: Subscription;
     private isBrowser: boolean;
     private privateKeyPromise!: Promise<CryptoKey | null>;
     @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
@@ -79,32 +80,23 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
     }
 
     ngOnInit() {
-      this.privateKeyPromise = this.loadPrivateKey();
+        this.privateKeyPromise = this.loadPrivateKey();
 
-      // Update active_users
-      return timer(0, this.pollInterval).pipe(
-      switchMap(() => this.api.getActiveUsersInChat(this.chatId)),
+        this.activeUsersSub = timer(0, this.pollInterval)
+            .pipe(
+                switchMap(() => this.api.getActiveUsersInChat(this.chatId)),
+                catchError((err) => {
+                    console.error('Erro ao obter usuarios ativos na sala:', err);
+                    return of({ users: [] });
+                })
+            )
+            .subscribe((response: any) => {
+                this.active_users_id = response.users;
 
-      // tap((response : any) => {
-      //   console.log("Usarios ativos: ", response)
-      // }),
-
-      catchError((err) => {
-        console.error('Erro ao obter usuarios ativos na sala:', err);
-        return throwError(() => err);
-      }),
-
-      ).subscribe({
-        next: (response: any) => {
-          this.active_users_id = response.users;
-
-          this.api.getUsernames(this.active_users_id).subscribe({
-          next: (response: any) => {
-          this.active_users_str = response
-            }
-          })
-        }
-      })
+                this.api.getUsernames(this.active_users_id).subscribe({
+                    next: (names) => (this.active_users_str = names)
+                });
+            });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -300,6 +292,10 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
         if (this.chatId) {
             this.chatService.disconnect(this.chatId);
         }
+         if (this.chatId) {
+        this.chatService.disconnect(this.chatId);
+        }
+        this.activeUsersSub?.unsubscribe();
         this.stateSub?.unsubscribe();
     }
 

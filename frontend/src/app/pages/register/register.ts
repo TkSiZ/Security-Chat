@@ -34,7 +34,7 @@ async create_account(){
 		const trimmedUsername = this.username.trim();
         const trimmedPassword = this.password.trim()
 
-    const email = this.email
+    const email = this.email.trim()
 		if (!trimmedUsername || !trimmedPassword) return;
         console.log("Creating account...")
 

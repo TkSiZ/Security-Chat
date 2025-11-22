@@ -3,14 +3,14 @@ import os
 import bcrypt
 import psycopg2
 import random
-import smtplib
-from email.mime.text import MIMEText
-# from app.encryption_utils import *
-# from .encryption_utils import * # this is what works for Vini
+import requests
 from dotenv import load_dotenv
 from fastapi import WebSocket
 from pydantic import BaseModel
 import time
+
+
+load_dotenv()
 
 def saveOtp(user_id: int, code: str, app):
     app.state.otp_storage[user_id] = {
@@ -44,18 +44,30 @@ def otpVerification(user_id: int, otpCode: str, app) -> bool:
     return True
 
 def send_email_code(recipient, user_id, app):
+    RESEND_KEY = "re_S8ixQ7Bm_NEUffQnPFypxqEt8z1tQGEus"
     code = generate_otp()
-    msg = MIMEText(f"Seu código de verificação é: {code}")
-    msg["Subject"] = "Seu código 2FA"
-    msg["From"] = "siithard2005@gmail.com"
-    msg["To"] = recipient
-
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login("siithard2005@gmail.com", "pryi lrix yhxr gtlg")
-        server.send_message(msg)
-        print("Código Enviado")
-        saveOtp(user_id, code, app)
+    saveOtp(user_id, code, app)
+    print(recipient)
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {RESEND_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "from": "security-chat@resend.dev",
+            "to": recipient,
+            "subject": "OTP Code",
+            "text": f"Seu código é: {code}"
+        }
+    )
+    print("Reached function")
+    print("User:", user_id)
+    print("Recipient:", recipient)
+    print(response.status_code)
+    print(response.text)
+    
+    
 
 class Users(BaseModel):
     payload: list[str]
