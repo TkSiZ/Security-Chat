@@ -6,7 +6,7 @@ import { UserContextService } from '../../services/context/context';
 import { Chat, CreateChat } from '../../types/chats';
 import { User } from '../../types/user';
 import { DataService } from '../../db.service';
-import {catchError, firstValueFrom, switchMap, tap, throwError, timer} from 'rxjs';
+import {catchError, firstValueFrom, Subscription, switchMap, tap, throwError, timer} from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
@@ -23,6 +23,9 @@ export class SidebarComponent {
   userId: number| null = null;
   room_id : number| null = null;
   users: User[] = [];
+
+  updateUsers!: Subscription
+  getAllUsers!: Subscription
 
   pollInterval: number = 5000; // tempo em ms entre chamadas para atualizar as salas
 
@@ -118,7 +121,7 @@ export class SidebarComponent {
 
   async ngOnInit(){
     // Updates user's rooms and all users
-    timer(0, this.pollInterval).pipe(
+    this.updateUsers = timer(0, this.pollInterval).pipe(
       switchMap(() => this.api.getUserRooms(this.userId!)),
 
       // tap((response : any) => {
@@ -159,7 +162,7 @@ export class SidebarComponent {
 
 
         // updates all users
-        this.api.getAllUsers().subscribe({
+        this.getAllUsers = this.api.getAllUsers().subscribe({
           next: (response: any) => {
             this.users = response.users;
             },
@@ -170,4 +173,11 @@ export class SidebarComponent {
     })
 
   }
+
+
+  ngOnDestroy(): void{
+      this.updateUsers?.unsubscribe();
+      this.getAllUsers?.unsubscribe();
+  }
+
 }
