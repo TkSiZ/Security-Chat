@@ -53,6 +53,7 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
 
     private stateSub!: Subscription;
     private activeUsersSub!: Subscription;
+    private getUsers!: Subscription;
     private isBrowser: boolean;
     private privateKeyPromise!: Promise<CryptoKey | null>;
     @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
@@ -87,15 +88,18 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
                 switchMap(() => this.api.getActiveUsersInChat(this.chatId)),
                 catchError((err) => {
                     console.error('Erro ao obter usuarios ativos na sala:', err);
-                    return of({ users: [] });
+                    return of({users: []});
                 })
             )
             .subscribe((response: any) => {
                 this.active_users_id = response.users;
 
-                this.api.getUsernames(this.active_users_id).subscribe({
-                    next: (names) => (this.active_users_str = names)
-                });
+                if (this.active_users_id) {
+                    this.getUsers = this.api.getUsernames(this.active_users_id).subscribe({
+                        next: (names) => (this.active_users_str = names),
+                        error: (err) => console.error("Failed to get users in chat:", err)
+                    });
+                }
             });
     }
 
@@ -292,10 +296,8 @@ export class ChatComponent implements OnChanges, OnDestroy, AfterViewChecked {
         if (this.chatId) {
             this.chatService.disconnect(this.chatId);
         }
-         if (this.chatId) {
-        this.chatService.disconnect(this.chatId);
-        }
         this.activeUsersSub?.unsubscribe();
+        this.getUsers?.unsubscribe();
         this.stateSub?.unsubscribe();
     }
 
