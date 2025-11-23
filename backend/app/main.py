@@ -152,7 +152,8 @@ async def websocket_endpoint(
             "user_id": user_id,
             "text" : f'{user_name} has left the chat.',
             "type": "EXIT", # "KEY" "MSG" "JOIN" "EXIT",
-            "destination": None
+            "destination": None,
+            "hash": ""
         }
         await manager.broadcast(payload, room_id, user_id)
 

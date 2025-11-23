@@ -18,6 +18,7 @@ from sendgrid.helpers.mail import Mail
 load_dotenv()
 
 def saveOtp(user_id: int, code: str, app):
+    print(code)
     app.state.otp_storage[user_id] = {
         "code": code,
         "expires": time.time() + 300
@@ -53,6 +54,7 @@ def send_email_code(recipient, user_id, app):
     code = generate_otp()
     saveOtp(user_id, code, app)
     print(recipient)
+    print(code)
 
     # Ignorar SSL (apenas teste, não usar em produção)
     # ssl._create_default_https_context = ssl._create_unverified_context 
