@@ -33,7 +33,6 @@ def otpVerification(user_id: int, otpCode: str, app) -> bool:
 
     stored = otp_storage[user_id]
 
-    # Verifica expiração
     if time.time() > stored["expires"]:
         print("Erro no Tempo")
         del otp_storage[user_id]
