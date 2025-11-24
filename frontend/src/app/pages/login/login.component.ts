@@ -22,6 +22,9 @@ export class LoginComponent {
 	otpCode: string = '';          // <--- NEW
     twoFactorStep: boolean = false; // <--- NEW
     userIdFromServer!: number;     // <--- NEW
+	publicKey !: string;
+	privateKey !: string;
+
 
 	constructor(
 		private router: Router,
@@ -45,6 +48,8 @@ export class LoginComponent {
 
 		const privatePem = await this.rsa.exportPrivateKey(privateKey);
 
+		this.publicKey = publicPem
+		this.privateKey = privatePem
 		// Se tiver persistencia de login tem q ver essa parada aqui
 		localStorage.setItem(`private_key_${trimmedUsername}`, privatePem);
 
@@ -79,6 +84,10 @@ export class LoginComponent {
 
 				console.log("Salas do usuário")
 				console.log(verifyData.user_rooms)
+				console.log("Chave pública")
+				console.log(this.publicKey)
+				console.log(this.privateKey)
+				console.log("Chave privada")
 
                 this.router.navigate([`/home/${this.username}`]);
             },
